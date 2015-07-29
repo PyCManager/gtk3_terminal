@@ -9,6 +9,8 @@ default_shell = "/usr/bin/zsh"
 default_width = 880
 default_height = 440
 
+css_file = 'test_vte.css'
+
 window_opacity = 0.90
 notebook_opacity = 0.95
 terminal_opacity = 0.80
@@ -16,6 +18,13 @@ terminal_opacity = 0.80
 #notebook_opacity = 1
 #terminal_opacity = 1
 terminal_scrollback = 9999
+terminal_encoding = "UTF-8"
+terminal_scroll_output = True
+terminal_scroll_key = True
+
+terminal_color_bg = gdk.RGBA(0, 1, 0, 1)
+terminal_color_fg = gdk.RGBA(1, 0, 0, 1)
+terminal_bg_image = ""
 
 TOP = gtk.PositionType.TOP
 RIGHT = gtk.PositionType.RIGHT
@@ -35,10 +44,11 @@ class HeaderBarWindow(gtk.Window):
 		hb = gtk.HeaderBar()
 		hb.set_show_close_button(True)
 		hb.props.title = "Test VTE 3"
+		hb.set_name("header_bar")
 		self.set_titlebar(hb)
 
 		button_menu = gtk.Button()
-		icon = gio.ThemedIcon(name="view-sidebar-symbolic")
+		icon = gio.ThemedIcon(name="open-menu-symbolic")
 		image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
 		button_menu.add(image)
 		button_menu.connect("clicked", self.on_button_menu_clicked)
@@ -87,6 +97,7 @@ class TestBox(gtk.Box):
 	def __init__(self):
 		gtk.Box.__init__(self, orientation=gtk.Orientation.HORIZONTAL)
 		gtk.StyleContext.add_class(self.get_style_context(), "linked")
+		self.set_name("test_box")
 		
 		self.notebook = TestNotebook("Term")
 		self.notebook.add_page(str(nb_pages))
@@ -105,15 +116,28 @@ class TestExecBox(gtk.Box):
 		gtk.Box.__init__(self, orientation=gtk.Orientation.VERTICAL)
 		gtk.StyleContext.add_class(self.get_style_context(), "linked")
 		
+#		self.override_background_color(gtk.StateType.NORMAL, gdk.RGBA(1,0,0,1))
+		self.set_name("test_exec_box")
 		self.notebook = notebook
 		print("NOTEBOOK:", self.notebook)
+		
 		button_new_tab = gtk.Button()
 		icon = gio.ThemedIcon(name="tab-new-symbolic")
 		image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
 		button_new_tab.add(image)
 		button_new_tab.connect("clicked", self.on_button_new_tab_clicked)
-		self.add(button_new_tab)
+		button_new_tab.set_name("button_new_tab")
+#		eb = gtk.EventBox()
+#		eb.add(button_new_tab)
+#		button_new_tab.modify_fg(gtk.StateType.NORMAL, gdk.Color(red=65535, green=65535, blue=65535))
+		
+#		color = gdk.color_parse('#234fdb')
+#		button_new_tab.modify_bg(gtk.StateType.PRELIGHT, color)
 
+		
+		self.add(button_new_tab)
+#		self.add(eb)
+		
 		button_quit_terminal = gtk.Button()
 		icon = gio.ThemedIcon(name="edit-delete-symbolic")
 		image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
@@ -250,6 +274,7 @@ class TestNotebook(gtk.Notebook):
 		self.set_tab_pos(BOTTOM)
 		self.pages = []
 		self.add_page(page_label)
+		self.set_name("notebook")
 	
 	def add_page(self, page_label):
 		global nb_pages
@@ -281,6 +306,7 @@ class TestTerminal(vte.Terminal):
 
 	def __init__(self):
 		vte.Terminal.__init__(self)
+		self.set_name("terminal")
 		self.connect("child-exited", TestNotebook.remove_page)
 		self.spawn_sync(
 				vte.PtyFlags.DEFAULT,
@@ -291,9 +317,17 @@ class TestTerminal(vte.Terminal):
 				None,
 				None,
 				)
-		self.set_encoding("UTF-8")
-		self.set_scrollback_lines(9999)
+		self.set_encoding(terminal_encoding)
+		self.set_scrollback_lines(terminal_scrollback)
+		self.set_scroll_on_output(terminal_scroll_output) 
+		self.set_scroll_on_keystroke(terminal_scroll_key)
+
+		self.set_color_background(terminal_color_bg) 
+		self.set_color_foreground(terminal_color_fg)
+		if terminal_bg_image != "":
+			self.set_background_image_file(terminal_bg_image)  
 		self.set_opacity(terminal_opacity)
+
 		
 #		font = pango.FontDescription()
 #		font.set_family("Ubuntu Mono")
@@ -313,6 +347,21 @@ class MainWindow(HeaderBarWindow):
 		HeaderBarWindow.__init__(self)
 		self.connect("delete-event", gtk.main_quit)
 		self.set_opacity(window_opacity)
+		self.set_name("main_window")
+		
+		style_provider = gtk.CssProvider()
+
+		css = open((css_file), 'rb') # rb needed for python 3 support
+		css_data = css.read()
+		css.close()
+
+		style_provider.load_from_data(css_data)
+
+		gtk.StyleContext.add_provider_for_screen(
+			gdk.Screen.get_default(), style_provider,     
+			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+		
 		self.show_all()
 
 
