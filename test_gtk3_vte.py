@@ -1,29 +1,64 @@
 #! /usr/bin/python
 
 from gi.repository import Gtk as gtk, Vte as vte, GLib as glib, Gdk as gdk, Gio as gio
-#import pango
 import sys
 import os
 
 default_shell = "/usr/bin/zsh"
-default_width = 880
-default_height = 440
+default_width = 1000
+default_height = 500
 
 css_file = 'test_vte.css'
 
-window_opacity = 0.90
-notebook_opacity = 0.95
-terminal_opacity = 0.80
-#window_opacity = 1
-#notebook_opacity = 1
-#terminal_opacity = 1
+#window_opacity = 0.90
+#notebook_opacity = 0.95
+#terminal_opacity = 0.80
+window_opacity = 1
+notebook_opacity = 1
+terminal_opacity = 1
 terminal_scrollback = 9999
 terminal_encoding = "UTF-8"
 terminal_scroll_output = True
 terminal_scroll_key = True
 
-terminal_color_bg = gdk.RGBA(0, 1, 0, 1)
-terminal_color_fg = gdk.RGBA(1, 0, 0, 1)
+def hex_to_RGBA(hex_color):
+	RGBA_color = gdk.RGBA()
+	RGBA_color.parse(hex_color)
+	RGBA_color.to_string()
+	return RGBA_color
+
+c_base03 = hex_to_RGBA("#002B36")
+c_base02 = hex_to_RGBA("#073642")
+c_base01 = hex_to_RGBA("#586e75")
+c_base00 = hex_to_RGBA("#657b83")
+c_base0 = hex_to_RGBA("#839496")
+c_base1 = hex_to_RGBA("#93a1a1")
+c_base2 = hex_to_RGBA("#eee8d5")
+c_base3 = hex_to_RGBA("#fdf6e3")
+c_yellow = hex_to_RGBA("#b58900")
+c_orange = hex_to_RGBA("#cb4b16")
+c_red = hex_to_RGBA("#dc322f")
+c_magenta = hex_to_RGBA("#d33682")
+c_violet = hex_to_RGBA("#6c71c4")
+c_blue = hex_to_RGBA("#268bd2")
+c_cyan = hex_to_RGBA("#2aa198")
+c_green = hex_to_RGBA("#859900")
+
+theme_used = "solarized_dark"
+
+terminal_palette_solarized_dark = [c_base01, c_red, c_green, c_yellow, c_blue, c_magenta, c_cyan, c_base2, c_base01, c_red, c_green, c_yellow, c_blue, c_magenta, c_cyan, c_base2]
+terminal_palette_solarized_light = [c_base01, c_red, c_green, c_yellow, c_blue, c_magenta, c_cyan, c_base1, c_base01, c_red, c_green, c_yellow, c_blue, c_magenta, c_cyan, c_base1]
+
+terminal_palette_size = 8
+#terminal_color_bg = gdk.RGBA(#002B36)
+#terminal_color_fg = gdk.RGBA(1, 0, 0, 1)
+terminal_color_bg_dark = c_base03
+terminal_color_fg_dark = c_base0
+terminal_color_bg_light = c_base3
+terminal_color_fg_light = c_base00
+terminal_color_cursor = gdk.RGBA(0, 0, 1, 1)
+terminal_color_highlight_bg = gdk.RGBA(0, 1, 1, 1)
+terminal_color_highlight_fg = gdk.RGBA(1, 0, 1, 1)
 terminal_bg_image = ""
 
 TOP = gtk.PositionType.TOP
@@ -322,21 +357,20 @@ class TestTerminal(vte.Terminal):
 		self.set_scroll_on_output(terminal_scroll_output) 
 		self.set_scroll_on_keystroke(terminal_scroll_key)
 
-		self.set_color_background(terminal_color_bg) 
-		self.set_color_foreground(terminal_color_fg)
+#		self.set_color_background(terminal_color_bg) 
+#		self.set_color_foreground(terminal_color_fg)
+#		self.set_color_cursor(terminal_color_cursor)
+#		self.set_color_highlight(terminal_color_highlight_bg)
+#		self.set_color_highlight_foreground(terminal_color_highlight_fg)
+
+		if theme_used == "solarized_dark":
+			self.set_colors(terminal_color_fg_dark, terminal_color_bg_dark, terminal_palette_solarized_dark)
+		elif theme_used == "solarized_light":
+			self.set_colors(terminal_color_fg_light, terminal_color_bg_light, terminal_palette_solarized_light)
+		
 		if terminal_bg_image != "":
 			self.set_background_image_file(terminal_bg_image)  
 		self.set_opacity(terminal_opacity)
-
-		
-#		font = pango.FontDescription()
-#		font.set_family("Ubuntu Mono")
-
-#		font.set_size(11 * pango.SCALE)
-#		font.set_weight(pango.WEIGHT_NORMAL)
-#		font.set_stretch(pango.STRETCH_NORMAL)
-#		
-#		self.set_font(font, True)
 
 
 
