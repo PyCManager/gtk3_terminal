@@ -13,11 +13,12 @@ default_height 	= 500
 css_file 	= "test_vte.css"
 theme_used 	= "solarized_dark"
 
-nb_term = 0
+nb_terminals	= 0
 
 terminal_list 	= []
-active_term 	= 0
 tab_list 		= []
+active_term 	= None
+nb_active_term	= -1
 
 window_opacity 		= 0.90
 notebook_opacity 	= 0.95
@@ -25,8 +26,8 @@ terminal_opacity 	= 0.80
 #window_opacity 	= 1
 #notebook_opacity 	= 1
 #terminal_opacity 	= 1
-terminal_scrollback = 9999
-terminal_encoding 	= "UTF-8"
+terminal_scrollback	= 9999
+terminal_encoding	= "UTF-8"
 terminal_scroll_output 	= True
 terminal_scroll_key 	= True
 
@@ -87,6 +88,7 @@ class TestTheme(object):
 		RGBA_color.to_string()
 		return RGBA_color
 
+
 class TestMainBox(gtk.Box):
 	
 	def __init__(self):
@@ -96,8 +98,8 @@ class TestMainBox(gtk.Box):
 		self.create_term_box()
 		self.create_tool_box()
 
-		self.active_tab = 0
-		self.add_new_tab("Term")
+#		self.active_tab = 0
+		self.add_new_term("Term")
 
 		
 	def create_term_box(self):
@@ -108,87 +110,100 @@ class TestMainBox(gtk.Box):
 		self.tool_box = TestToolBox(self)
 		self.pack_end(self.tool_box, False, True, 0)
 	
-	def add_new_tab(self, tab_label):
-		global nb_term
+	def add_new_term(self, tab_label):
+		global nb_terminals, nb_active_term
 		self.term_box.add_term()
 		self.tool_box.tab_box.add_tab(tab_label)
-		nb_term = len(terminal_list)
+		nb_terminals = len(terminal_list)
 		print("terminal_list:", terminal_list)
 		print("tab_list:", tab_list)
 		print("Lenght terminal_list:", len(terminal_list))
 		print("Lenght tab_list:", len(tab_list))
-		print("nb_term:", nb_term)
-		self.set_term_active(nb_term)
+		print("nb_terminals:", nb_terminals)
+		nb_term_to_activate = nb_terminals - 1
+		self.set_term_active(nb_term_to_activate)
 		self.show_all()
 			
-	def set_term_active(self, nb_tab):
-		global active_term
-		print("a", self.active_tab, "b", nb_tab)
-		if self.active_tab != nb_tab:
+	def set_term_active(self, nb_term_to_activate):
+		global active_term, nb_active_term, terminal_list, tab_list
+		print("a", nb_active_term, "b", nb_term_to_activate)
+		if nb_active_term != nb_term_to_activate:
 			i = 0
 			for tab in tab_list:
 				tab_list[i].set_name("tab_button")
 				i += 1
 			
-			self.active_tab = nb_tab
-			print("active_tab:", self.active_tab)
-			tab_list[self.active_tab - 1].set_name("active_button")
-			self.active_term = terminal_list[self.active_tab - 1]
+			nb_active_term = nb_term_to_activate
+			print("nb_active_term:", nb_active_term)
+			tab_list[nb_active_term].set_name("active_button")
+			active_term = terminal_list[nb_active_term]
 			
-			if nb_term > 1:
-				print("Removing old terminal")
+			if nb_terminals > 1:
+				print("Removing old terminal from window")
 				self.term_box.destroy()
 				self.create_term_box()
 				
-			print("New active term:", self.active_term)
-			active_term = self.active_term
+			print("New active term:", active_term)
+			print("New active term:", nb_active_term)			
 
-			self.term_box.add(self.active_term)
+			self.term_box.add(active_term)
 			self.show_all()
-			active_term.grab_focus()
+			
+		active_term.grab_focus()
+		active_term.connect("child-exited", self.on_term_child_exited)
 
+	def on_term_child_exited(self, term, arg):
+		print("Action: Removing terminal:", nb_active_term)
+		self.remove_term(nb_active_term)
+			
+	def remove_term(self, nb_term_rm):
+		global nb_terminals, terminal_list, tab_list, nb_active_term
+		print("NB_TERM to be removed:", nb_term_rm)
+		print("NB of terminals:", nb_terminals)
 		
-	
+		
+		term_rm = terminal_list.pop(nb_term_rm)
+		term_rm.destroy()
+		tab_rm = tab_list.pop(nb_term_rm)
+		tab_rm.destroy()
+		
+		nb_terminals = len(terminal_list)
+		
+		if nb_terminals < 1:
+			print("Removing the only terminal")
+#			self.active_tab = 0
+			nb_active_term = -1
+			self.add_new_term("test")
+		else:
+			print("Removing terminal:", nb_term_rm)
+#			self.active_tab = nb_term_rm
+			if nb_term_rm == 0:
+				nb_term_to_activate = 0
+			else:
+				nb_term_to_activate = nb_active_term - 1
+			nb_active_term = -1
+			print("New active terminal:", nb_term_to_activate)
+			self.set_term_active(nb_term_to_activate)
+
+		self.show_all()			
+
+			
 class TestTermBox(gtk.Box):
 	
 	def __init__(self, parent):
 		gtk.Box.__init__(self, orientation=gtk.Orientation.HORIZONTAL)
-#		gtk.Box.__init__(self)
 		gtk.StyleContext.add_class(self.get_style_context(), "linked")
 		self.set_name("term_box")
 		self.parent = parent
 		
 	def add_term(self):
-		global nb_term, terminal_list
-		nb_term += 1
+		global nb_terminals, terminal_list
 		self.term = TestTerminal()
 		self.term.set_hexpand(True)
 		self.term.grab_focus()
-#		self.term.connect("child-exited", self.remove_term)
 		terminal_list.append(self.term)
-
-#	def remove_term(self, term, arg):
-#		global nb_term, terminal_list
-#		print(nb_term, "terminal remaining")
-#		print("Removing active terminal")
-#		nb_term -= 1
-##		self.term.destroy()
-#		print("Term list:", terminal_list)
-#		i = 0
-#		for term in terminal_list:
-#			print("term:", term)
-#			if self.term == term:
-#				print("self:", self.term)
-#				break
-#			i += 1
-#		print("i:", i)
-#		terminal_list[i].destroy()
-#		terminal_list.pop(i)
-#		print("Term list:", terminal_list)
-#		if nb_term <= 1: 
-#			self.add_term()
-#			self.show_all()
-
+		nb_terminals = len(terminal_list)
+		
 
 class TestToolBox(gtk.Box):
 	
@@ -238,7 +253,7 @@ class TestTabBox(gtk.Box):
 			if tab == widget:
 				break
 			i += 1
-		self.parent.parent.set_term_active(i + 1)
+		self.parent.parent.set_term_active(i)
 
 
 class TestShortcutBox(gtk.Box):
@@ -253,16 +268,30 @@ class TestShortcutBox(gtk.Box):
 		self.add_shortcuts()
 		
 	def add_shortcuts(self):
-		self.button_new_tab = gtk.Button()
+		self.button_new_term = gtk.Button()
 		icon = gio.ThemedIcon(name="tab-new-symbolic")
 		image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
-		self.button_new_tab.add(image)
-		self.button_new_tab.connect("clicked", self.on_button_new_tab_clicked)
-		self.add(self.button_new_tab)
+		self.button_new_term.add(image)
+		self.button_new_term.connect("clicked", self.on_button_new_term_clicked)
+		
+		self.button_close_term = gtk.Button()
+		icon = gio.ThemedIcon(name="edit-delete-symbolic")
+		image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
+		self.button_close_term.add(image)
+		self.button_close_term.connect("clicked", self.on_button_close_term_clicked)
+
+		self.add(self.button_close_term)
+		self.add(self.button_new_term)
 	
-	def on_button_new_tab_clicked(self, widget):
-		print("New tab")
-		self.parent.parent.add_new_tab(len(terminal_list))
+	def on_button_new_term_clicked(self, widget):
+		global terminal_list
+		print("Creating new terminal")
+		self.parent.parent.add_new_term(len(terminal_list))
+
+	def on_button_close_term_clicked(self, widget):
+		global nb_active_term
+		print("Closing active terminal")
+		self.parent.parent.remove_term(nb_active_term)
 		
 
 class TestHeaderBar(gtk.Window):
@@ -290,7 +319,7 @@ class TestHeaderBar(gtk.Window):
 		self.set_titlebar(hb)
 		self.main_box = TestMainBox()
 		self.add(self.main_box)
-		active_term.grab_focus()
+#		active_term.grab_focus()
 		
 	def on_button_menu_clicked(self, widget): 
 		print("Menu clicked")
@@ -352,6 +381,7 @@ class MainWindow(TestHeaderBar):
 #		self.set_type_hint(gdk.WindowTypeHint.NORMAL)
 		self.is_present = True
 		self.have_focus = True
+		
 		self.load_css()
 		self.bind_key()
 		self.show_all()
@@ -360,11 +390,11 @@ class MainWindow(TestHeaderBar):
 
 
 	def on_focus_in_event(self, window, event):
-		print("I'VE GOT FOCUS")
+		print("Window is focused")
 		self.have_focus = True
 	
 	def on_focus_out_event(self, window, event):
-		print("FOCUS IS NOT HERE ANYMORE")
+		print("Window is not focused anymore")
 		self.have_focus = False
 		
 	
@@ -409,41 +439,41 @@ class MainWindow(TestHeaderBar):
 
 	def on_window_state_event(self, window, event):
 		self.count_changed_state += 1
-		print("Count:", self.count_changed_state)
-		print("Window state changed")
-		print("Event changed_mask:", event.changed_mask)
-		print("Event_state:", event.new_window_state)
+#		print("Count:", self.count_changed_state)
+#		print("Window state changed")
+#		print("Event changed_mask:", event.changed_mask)
+#		print("Event_state:", event.new_window_state)
 
 		if self.is_active():
-			print("Window is active")
+#			print("Window is active")
 			self.is_present = True
 		
 		if event.changed_mask & ICONIFIED:
 			if event.new_window_state & ICONIFIED:
-				print("WINDOW IS ICONIFIED")
+#				print("WINDOW IS ICONIFIED")
 				self.is_present = False
 			elif event.new_window_state == 0:
-				print("WINDOW IS DEICONIFIED")
+#				print("WINDOW IS DEICONIFIED")
 				self.is_present = True
 				
 		elif event.changed_mask & (FOCUSED | TILED):
 			if event.new_window_state == 0:
-				print("WINDOW IS HIDDEN")
+#				print("WINDOW IS HIDDEN")
 				self.is_present = False
 			elif event.new_window_state & FOCUSED:
-				print("WINDOW IS FOCUSED")
+#				print("WINDOW IS FOCUSED")
 				self.is_present = True
 			elif event.new_window_state & TILED:
-				print("WINDOW IS HIDDEN")
+#				print("WINDOW IS HIDDEN")
 				self.is_present = False
 				
 		if event.changed_mask & WITHDRAWN:
 			if event.new_window_state & WITHDRAWN:
-				print("WINDOW IS WITHDRAWN")
+#				print("WINDOW IS WITHDRAWN")
 				self.is_present = False
 
-		active_term.grab_focus()
-		self.set_focus(active_term)
+#		active_term.grab_focus()
+#		self.set_focus(active_term)
 		return True
 			
 
