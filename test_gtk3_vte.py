@@ -1,7 +1,9 @@
 #! /usr/bin/python
 
 from gi.repository import Gtk as gtk, Vte as vte, GLib as glib, Gdk as gdk, Gio as gio, Keybinder
-import weakref
+#from evdev import uinput, ecodes as e
+#import pyautogui
+#import weakref
 import signal
 import sys
 import os
@@ -9,9 +11,13 @@ import os
 default_shell 	= "/usr/bin/zsh"
 default_width 	= 1000
 default_height 	= 500
+path_open_terminal = "HOME"
 
 css_file 	= "test_vte.css"
 theme_used 	= "solarized_dark"
+
+shortcut_dict = {	"<Alt>Up" : "accel_new_term", "<Alt>Left" : "accel_prev_term", 
+					"<Alt>Right" : "accel_next_term", "<Control><Alt>N" : "accel_test"}
 
 nb_terminals	= 0
 
@@ -98,9 +104,7 @@ class TestMainBox(gtk.Box):
 		self.create_term_box()
 		self.create_tool_box()
 
-#		self.active_tab = 0
 		self.add_new_term("Term")
-
 		
 	def create_term_box(self):
 		self.term_box = TestTermBox(self)
@@ -161,7 +165,6 @@ class TestMainBox(gtk.Box):
 		print("NB_TERM to be removed:", nb_term_rm)
 		print("NB of terminals:", nb_terminals)
 		
-		
 		term_rm = terminal_list.pop(nb_term_rm)
 		term_rm.destroy()
 		tab_rm = tab_list.pop(nb_term_rm)
@@ -171,12 +174,10 @@ class TestMainBox(gtk.Box):
 		
 		if nb_terminals < 1:
 			print("Removing the only terminal")
-#			self.active_tab = 0
 			nb_active_term = -1
 			self.add_new_term("test")
 		else:
 			print("Removing terminal:", nb_term_rm)
-#			self.active_tab = nb_term_rm
 			if nb_term_rm == 0:
 				nb_term_to_activate = 0
 			else:
@@ -200,6 +201,10 @@ class TestTermBox(gtk.Box):
 		global nb_terminals, terminal_list
 		self.term = TestTerminal()
 		self.term.set_hexpand(True)
+		self.term.set_vexpand(True)
+#		self.clear = "clear\n"
+#		self.length_clear = len(self.clear)
+#		self.term.feed_child(self.clear, self.length_clear)
 		self.term.grab_focus()
 		terminal_list.append(self.term)
 		nb_terminals = len(terminal_list)
@@ -225,8 +230,6 @@ class TestToolBox(gtk.Box):
 		self.pack_end(self.shortcut_box, False, True, 0)
 	
 
-
-
 class TestTabBox(gtk.Box):
 	
 	def __init__(self, parent): 
@@ -234,8 +237,6 @@ class TestTabBox(gtk.Box):
 		gtk.StyleContext.add_class(self.get_style_context(), "linked")
 		self.set_name("tab_box")
 		self.parent = parent
-		
-#		self.tab_list = []
 		
 	def add_tab(self, tab_label):
 		global tab_list
@@ -263,8 +264,6 @@ class TestShortcutBox(gtk.Box):
 		gtk.StyleContext.add_class(self.get_style_context(), "linked")
 		self.set_name("shortcut_box")
 		self.parent = parent
-		
-#		print("Parent:", parent)
 		self.add_shortcuts()
 		
 	def add_shortcuts(self):
@@ -298,10 +297,9 @@ class TestHeaderBar(gtk.Window):
 
 	def __init__(self):
 		gtk.Window.__init__(self, title="test", type=gtk.WindowType.TOPLEVEL)
-#		self.set_default_size(default_width, default_height)
 		hb = gtk.HeaderBar()
 		hb.set_show_close_button(True)
-		hb.props.title = "Test VTE 4"
+		hb.props.title = "Test VTE 5"
 		hb.set_name("header_bar")
 
 		box_end = gtk.Box(orientation=gtk.Orientation.HORIZONTAL)
@@ -319,7 +317,6 @@ class TestHeaderBar(gtk.Window):
 		self.set_titlebar(hb)
 		self.main_box = TestMainBox()
 		self.add(self.main_box)
-#		active_term.grab_focus()
 		
 	def on_button_menu_clicked(self, widget): 
 		print("Menu clicked")
@@ -339,10 +336,9 @@ class TestTerminal(vte.Terminal):
 	def __init__(self):
 		vte.Terminal.__init__(self)
 		self.set_name("terminal")
-#		self.connect("child-exited", TestNotebook.remove_page)
 		self.spawn_sync(
 				vte.PtyFlags.DEFAULT,
-				os.environ['HOME'],
+				os.environ[path_open_terminal],
 				[default_shell],
 				[],
 				glib.SpawnFlags.DO_NOT_REAP_CHILD,
@@ -375,19 +371,64 @@ class MainWindow(TestHeaderBar):
 		self.set_name("main_window")
 		self.set_default_size(default_width, default_height)
 		self.connect("delete-event", gtk.main_quit)
-		self.connect('window-state-event', self.on_window_state_event)
-		self.connect('focus-in-event', self.on_focus_in_event)
-		self.connect('focus-out-event', self.on_focus_out_event)
+		self.connect("window-state-event", self.on_window_state_event)
+		self.connect("focus-in-event", self.on_focus_in_event)
+		self.connect("focus-out-event", self.on_focus_out_event)
+#		self.connect("key-press-event", self.on_key_press_event)
+#		self.connect("key-release-event", self.on_key_release_event)
 #		self.set_type_hint(gdk.WindowTypeHint.NORMAL)
 		self.is_present = True
 		self.have_focus = True
+		self.mod_pressed = ""
 		
 		self.load_css()
+		self.load_shortcuts()
 		self.bind_key()
 		self.show_all()
 		self.count_changed_state = 0
-		self.last_count_changed_state = 0
+		
+		
+	def load_shortcuts(self):
+		self.accel_group = gtk.AccelGroup()
+		
+		for shortcut in shortcut_dict:
+			function_str = shortcut_dict[shortcut]
+			function_to_call = getattr(self, function_str)
+			print("SHORTCUT:", shortcut)
+			print("FUNCTION:", function_to_call)
+			key, mod = gtk.accelerator_parse(shortcut)
+			print("KEY:", key)
+			print("MOD:", mod)
+			self.accel_group.connect(key, mod, 0, function_to_call)
+			
+		self.add_accel_group(self.accel_group)
+	
+	
+	def accel_new_term(self, accel_group, window, key, mod):
+		print("Accelerator for new term")
+		self.main_box.add_new_term("test")
+		
+	
+	def accel_prev_term(self, accel_group, window, key, mod):
+		print("Accelerator for prev term")
+		if nb_active_term:
+			self.main_box.set_term_active(nb_active_term - 1)
+		else:
+			self.main_box.set_term_active(nb_terminals - 1)
 
+
+	def accel_next_term(self, accel_group, window, key, mod):
+		print("Accelerator for next term")
+		print("Current terminal:", active_term)
+		print("nb_active_term:", nb_active_term)
+		if nb_active_term < nb_terminals - 1:
+			self.main_box.set_term_active(nb_active_term + 1)
+		else:
+			self.main_box.set_term_active(0)
+
+
+	def accel_test(self, accel_group, window, key, mod):
+		print("AWESOME TEST")
 
 	def on_focus_in_event(self, window, event):
 		print("Window is focused")
@@ -397,7 +438,7 @@ class MainWindow(TestHeaderBar):
 		print("Window is not focused anymore")
 		self.have_focus = False
 		
-	
+		
 	def load_css(self):
 		style_provider = gtk.CssProvider()
 
@@ -412,11 +453,12 @@ class MainWindow(TestHeaderBar):
 			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
 	
+	
 	def bind_key(self):
 		key_bind_hide = "Menu"
 		Keybinder.init()
 		Keybinder.bind(key_bind_hide, self.hide_app, "key_bind_hide: %s"% key_bind_hide)
-		
+	
 	
 	def hide_app(self, key_bind_hide, user_data):
 		self.last_event_time = Keybinder.get_current_event_time()
@@ -472,18 +514,14 @@ class MainWindow(TestHeaderBar):
 #				print("WINDOW IS WITHDRAWN")
 				self.is_present = False
 
-#		active_term.grab_focus()
-#		self.set_focus(active_term)
 		return True
-			
+				
 
 def signal_handler(signal_rcv, frame):
 	print("PID of application:", os.getpid())
 	print("SIGNAL:", signal_rcv)
 	os.killpg(os.getpid(), signal.SIGTERM)
-#	gtk.main_quit()
 
-	
 
 if __name__ == "__main__":
 #	signal.signal(signal.SIGINT, signal_handler)
