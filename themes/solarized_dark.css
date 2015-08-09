@@ -1,0 +1,126 @@
+#tool_box{
+	background-color: #5c3566;
+	border-width: 6px 0px 0px 0px;
+	border-style: dashed;
+	border-color: #ad7fa8;
+}
+
+/*#tool_box GtkButton{*/
+/*	*/
+/*}*/
+
+#event_tab_box{
+	background-color: #002b36;
+	border-width: 6px 0px 0px 0px;
+	border-style: solid;
+	border-color: #073642;
+}
+
+#event_shortcut_box{
+	background-color: #002b36;
+	border-width: 6px 0px 0px 0px;
+	border-style: solid;
+	border-color: #073642;
+}
+
+#scroll_window_tab{
+	background-color: #002b36;
+/*	border-width: 6px;*/
+	border-style: solid;
+	border-color: #002b36;
+}
+
+#scroll_window_term{
+	background-color: #002b36;
+	border-width: 6px;
+	border-style: solid;
+	border-color: #002b36;
+}
+
+#scroll_window_term{
+	background-color: #4e9a06;
+	border-width: 6px;
+	border-style: solid;
+	border-color: #8ae234;
+}
+
+
+#shortcut_box{
+	border-width: 6px;
+	border-style: solid;
+	border-color: #002b36;
+	background-color: #002b36;
+}
+
+#shortcut_box GtkButton{
+	background-image: none;
+	background-color: #002b36;
+	border-width: 0px;
+	border-style: solid;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+#tab_box GtkButton{
+	border-color: #002b36;
+	border-width: 4px;
+	border-radius: 0;
+	padding: 4px 8px;
+	box-shadow: none;
+
+
+}
+
+/*#term_box{*/
+/*	border-color: #ad7fa8;*/
+/*	border-width: 10px;*/
+/*	border-style: dashed;*/
+/*}*/
+
+#tab_button{
+	background-image: none;
+	background-color: #073642;
+	border-style: solid;
+/*	border-width: 0px;*/
+/*	border-color: #FF0;*/
+}
+
+#tab_button GtkLabel{
+	color: #586e75;
+	text-shadow: none;
+}
+
+#tab_button:hover GtkLabel{
+	color: #859900;
+	text-shadow: none;
+}
+
+#tab_button:active GtkLabel{
+	color: #268bd2;
+	text-shadow: none;
+}
+
+#active_button{
+	background-image: none;
+	background-color: #586e75;
+	border-style: solid;
+/*	border-width: 0px;*/
+/*	border-color: #FF0;*/
+}
+
+#active_button GtkLabel{
+	color: #002B36;
+	text-shadow: none;
+}
+
+#active_button:hover GtkLabel{
+	color: #859900;
+	text-shadow: none;
+}
+
+#active_button:active GtkLabel{
+	color: #268bd2;
+	text-shadow: none;
+}
+
+

@@ -1,0 +1,62 @@
+#shortcut_box GtkButton{
+/*	border-width: 0px;*/
+/*	border-radius: 0px;*/
+	box-shadow: none;
+}
+
+
+#active_button{
+	background-image: none;
+	background-color: #586e75;
+	border-style: none;
+	border-width: 4px;
+	border-radius: 0px;
+	box-shadow: none;
+}
+
+#active_button:hover{
+	box-shadow: none;
+}
+
+#active_button GtkLabel{
+	color: #002B36;
+	text-shadow: none;
+}
+
+#active_button:hover GtkLabel{
+	color: #859900;
+	text-shadow: none;
+}
+
+#active_button:active GtkLabel{
+	color: #268bd2;
+	text-shadow: none;
+}
+
+
+
+#tab_button{
+	border-style: none;
+	border-width: 4px;
+	border-radius: 0px;
+	box-shadow: none;
+}
+
+#tab_button:hover{
+	box-shadow: none;
+}
+
+#tab_button GtkLabel{
+	color: #002B36;
+	text-shadow: none;
+}
+
+#tab_button:hover GtkLabel{
+	color: #859900;
+	text-shadow: none;
+}
+
+#tab_button:active GtkLabel{
+	color: #268bd2;
+	text-shadow: none;
+}
