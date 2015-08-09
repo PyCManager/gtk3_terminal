@@ -9,10 +9,12 @@ default_theme 	= theme_list[1]
 
 path_to_css = "./themes/"
 path_to_icons = "./icons/"
+file_window_state = "./config/window_state"
 
 window_default_width 	= 1000
 window_default_height 	= 500
 window_opacity 		= 0.90
+window_restore_state = True
 #window_opacity 	= 1
 
 show_close_button = True
@@ -39,6 +41,10 @@ terminal_scroll_key 	= True
 terminal_default_path 	= expanduser("~")
 terminal_print_working_dir_path = False
 terminal_print_working_dir = True
+terminal_open_tab_working_dir = True
+terminal_deleted_activate_prev = True
+terminal_mouse_autohide = True
 
-launch_command_new_term = 0
+#Cleaning is a hack to hide a white 1px bar around tool_box when using a dark theme
+launch_command_new_term = "clear\n"
 

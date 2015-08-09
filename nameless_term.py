@@ -3,6 +3,7 @@
 from gi.repository import Gtk as gtk, Vte as vte, Gdk as gdk, Keybinder
 import test_theme, test_config as config, test_term_box, test_tool_box
 import signal
+import json
 import sys
 import os
 
@@ -47,8 +48,7 @@ class TestMainBox(gtk.Box):
 		self.tab_list = self.tool_box.tab_box.add_tab(tab_label, self.tab_list)
 		if self.nb_terminals >= 1:
 			self.set_tab_label()
-			
-		if self.working_dir != config.terminal_default_path:
+		if config.terminal_open_tab_working_dir:
 			self.path_open_terminal = self.working_dir
 		self.terminal_list = self.term_box.create_term(self.terminal_list, self.path_open_terminal)
 
@@ -61,6 +61,8 @@ class TestMainBox(gtk.Box):
 			
 			
 	def set_term_active(self, nb_term_to_activate):
+		print("nb_active_term:", self.nb_active_term)
+		print("nb_term_to_activate:", nb_term_to_activate)
 		if self.nb_active_term != nb_term_to_activate:
 			for tab in self.tab_list:
 				tab.set_name("tab_button")
@@ -75,6 +77,10 @@ class TestMainBox(gtk.Box):
 				
 			print("New active terminal:", self.nb_active_term)			
 			self.term_box.scroll_window_term.add(self.active_term)
+#			self.active_term.set_border_width(config.width_tab_box_border)
+#			print("SCROLL TERM child:", dir(self.active_term))
+			self.active_term.show_now()
+			
 			
 		self.active_term.grab_focus()
 		self.active_term.connect("child-exited", self.on_term_child_exited)
@@ -82,6 +88,7 @@ class TestMainBox(gtk.Box):
 		
 		self.set_tab_label()
 		self.show_all()
+		
 	
 	
 	def set_tab_label(self):
@@ -119,26 +126,33 @@ class TestMainBox(gtk.Box):
 		
 		self.nb_terminals = len(self.terminal_list)
 		nb_term_to_activate = 0
-		
+
 		if self.nb_terminals < 1:
 			print("Removing the only terminal")
 			self.nb_active_term = -1
 			self.add_new_term("test")
-			nb_term_to_activate = self.nb_active_term
-		else:
-			if tab_clicked:
-				if self.nb_active_term < nb_term_rm:
-					nb_term_to_activate = self.nb_active_term
-				elif self.nb_active_term >= nb_term_rm:
-					nb_term_to_activate = self.nb_active_term - 1
-				print("NB_ACTIVE:", self.nb_active_term)
-				print("NB_TO_ACTIVE:", nb_term_to_activate)
+			nb_term_to_activate = 0
+			
+		elif tab_clicked:
+			if self.nb_active_term < nb_term_rm:
+				nb_term_to_activate = self.nb_active_term
+			elif self.nb_active_term >= nb_term_rm:
+				nb_term_to_activate = self.nb_active_term - 1
+			
+		elif config.terminal_deleted_activate_prev:
+			if nb_term_rm == 0:
+				nb_term_to_activate = 0
 			else:
-				if nb_term_rm == 0:
-					nb_term_to_activate = 0
-				else:
-					nb_term_to_activate = nb_term_rm - 1
-				self.nb_active_term = -1
+				nb_term_to_activate = nb_term_rm - 1
+			self.nb_active_term = -1
+			
+		elif not config.terminal_deleted_activate_prev:
+			if nb_term_rm == self.nb_terminals:
+				nb_term_to_activate = nb_term_rm - 1
+			else:
+				nb_term_to_activate = nb_term_rm				 
+			self.nb_active_term = -1
+			
 		
 		self.set_term_active(nb_term_to_activate)
 		print("nb of terminals after:", self.nb_terminals)
@@ -177,12 +191,34 @@ class TestHeaderBar(gtk.HeaderBar):
 		self.button_menu.add(image)
 		self.button_menu.connect("clicked", self.on_button_menu_clicked)
 		
+		self.button_save_state = gtk.Button("Save")
+#		image = theme.get_image("header_menu")
+#		self.button_menu.add(image)
+		self.button_save_state.connect("clicked", self.on_button_save_state_clicked)
+
+		self.box_end.add(self.button_save_state)		
 		self.box_end.add(self.button_menu)
 		self.pack_end(self.box_end)
 
 		self.show_all()
 
 			
+	def on_button_save_state_clicked(self, widget):
+		print("Saving window state")
+		print("Window position:", self.parent.get_position())
+		print("Window size:", self.parent.get_size())
+		self.window_state = []
+		self.window_state.append(self.parent.get_position())
+		self.window_state.append(self.parent.get_size())
+#		print("position", self.parent.get_position()[0])
+		print("WINDOW:", self.window_state)
+		with open(config.file_window_state, "w") as f:
+			json.dump(self.window_state, f)
+#			json.dump(self.parent.get_size(), f)
+		f.close()
+		
+#		self.show_all()
+
 	def on_button_menu_clicked(self, widget): 
 		print("Menu clicked")
 		self.parent.main_box.remove_term(self.parent.main_box.nb_active_term, False)
@@ -195,7 +231,21 @@ class MainWindow(gtk.Window):
 	def __init__(self):
 		gtk.Window.__init__(self, title="test", type=gtk.WindowType.TOPLEVEL)
 		self.set_name("main_window")
-		self.set_default_size(config.window_default_width, config.window_default_height)
+		
+		if config.window_restore_state:
+			print("Restoring window state")
+			with open(config.file_window_state, "r") as f:
+				data = json.load(f)
+			f.close()
+			self.window_position = data[0]
+			self.window_size = data[1]
+			print("position:", data[0])
+			print("size:", data[1])
+			self.move(self.window_position[0], self.window_position[1])
+			self.set_default_size(self.window_size[0], self.window_size[1])
+		else:
+			self.set_default_size(config.window_default_width, config.window_default_height)
+
 		self.connect("delete-event", gtk.main_quit)
 		self.connect("window-state-event", self.on_window_state_event)
 		self.connect("focus-in-event", self.on_focus_in_event)
@@ -222,7 +272,7 @@ class MainWindow(gtk.Window):
 		self.add(self.main_box)
 		self.set_opacity(config.window_opacity)
 		self.show_all()
-		
+	
 	
 	def load_css(self, css_file):
 		style_provider = gtk.CssProvider()
@@ -293,7 +343,7 @@ class MainWindow(gtk.Window):
 		else:
 			print("Showing app")
 			self.present_with_time(self.last_event_time)
-			self.active_term.grab_focus()
+			self.main_box.active_term.grab_focus()
 			self.is_present = True
 
 
@@ -305,6 +355,8 @@ class MainWindow(gtk.Window):
 		WITHDRAWN	= gdk.WindowState.WITHDRAWN
 		HIDDEN 		= "HIDDEN"
 		DEICONIFIED	= "DEICONIFIED"
+		
+#		print("Window size:", self.get_size())
 
 		self.count_changed_state += 1
 

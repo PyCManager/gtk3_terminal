@@ -5,9 +5,15 @@
 	border-color: #ad7fa8;
 }
 
-/*#tool_box GtkButton{*/
-/*	*/
-/*}*/
+#tool_box GtkButton{
+	text-shadow: none;
+	box-shadow: none;
+}
+
+#tool_box GtkButton GtkLabel{
+	text-shadow: none;
+	box-shadow: none;
+}
 
 #event_tab_box{
 	background-color: #002b36;

@@ -7,7 +7,8 @@ path_to_icons = config.path_to_icons
 
 icon_dict = { 	"new_term" : "tab-new-symbolic", 
 				"close_term" : "edit-delete-symbolic",
-				"header_menu" : "open-menu-symbolic"}
+				"header_menu" : "open-menu-symbolic",
+				"tab_menu" : "open-menu-symbolic"}
 
 
 
@@ -50,7 +51,8 @@ class TestTheme(object):
 			self.terminal_highlight_fg = c_base03
 			icon_dict["new_term"] = "new_term_solarized_dark"
 			icon_dict["close_term"] = "close_term_solarized_dark"
-			icon_dict["header_menu"] = "header_menu_solarized_dark"
+#			icon_dict["header_menu"] = "header_menu_solarized_dark"
+			icon_dict["tab_menu"] = "tab_menu_solarized_dark"
 			self.relief_button_shortcut_box = gtk.ReliefStyle.NONE
 			self.relief_button_tab_box = gtk.ReliefStyle.NONE
 			
@@ -89,7 +91,10 @@ class TestTheme(object):
 			image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
 		else:
 			image_name = path_to_icons + icon_dict[image_name] + ".svg"
-			image = gtk.Image.new_from_file(image_name)
+			try:
+				image = gtk.Image.new_from_file(image_name)
+			except Exception:
+				print("Exception opening file:", image_name)
 		
 		return image
 

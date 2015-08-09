@@ -44,10 +44,10 @@ class TestToolBox(gtk.Box):
 		self.event_tab_box.connect("button-press-event", self.on_button_press_event)
 		self.event_tab_box.add(self.scroll_window_tab)
 		
-#		self.set_border_width(width_scrollwindow_tab_border)
-#		self.event_tab_box.set_border_width(width_scrollwindow_tab_border)
+#		self.parent.set_border_width(config.width_tab_box_border)
+#		self.event_tab_box.set_border_width(config.width_tab_box_border)
 		self.scroll_window_tab.set_border_width(config.width_tab_box_border)
-#		self.tab_box.set_border_width(width_scrollwindow_tab_border)
+#		self.tab_box.set_border_width(config.width_tab_box_border)
 
 		if config.tab_box_pack_start:
 			self.pack_start(self.event_tab_box, True, True, 0)
@@ -176,10 +176,19 @@ class TestShortcutBox(gtk.Box):
 		image = self.theme.get_image("close_term")
 		self.button_close_term.add(image)
 		self.button_close_term.connect("clicked", self.on_button_close_term_clicked)
+		
+		self.button_menu = gtk.Button()
+		image = self.theme.get_image("tab_menu")
+		self.button_menu.add(image)
+		self.button_menu.connect("clicked", self.on_button_menu_clicked)
+		
 
-		self.add(self.button_close_term)
 		self.add(self.button_new_term)
+		self.add(self.button_close_term)
+		self.add(self.button_menu)
 	
+	def on_button_menu_clicked(self, widget):
+		print("Accessing menu")
 	
 	def on_button_new_term_clicked(self, widget):
 		print("Creating new terminal")

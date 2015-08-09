@@ -14,7 +14,6 @@ class TestTermBox(gtk.Box):
 		self.parent = parent
 		
 		self.theme = theme
-		
 		self.scroll_window_term = gtk.ScrolledWindow()
 		self.scroll_window_term.set_name("scroll_window_term")
 
@@ -35,6 +34,7 @@ class TestTermBox(gtk.Box):
 			
 		self.term.grab_focus()
 		terminal_list.append(self.term)
+		
 		return terminal_list
 
 
@@ -58,6 +58,7 @@ class TestTerminal(vte.Terminal):
 		self.set_scrollback_lines(config.terminal_scrollback)
 		self.set_scroll_on_output(config.terminal_scroll_output) 
 		self.set_scroll_on_keystroke(config.terminal_scroll_key)
+		self.set_mouse_autohide(config.terminal_mouse_autohide)
 		
 		if theme.theme_used != "default":
 			self.set_colors(theme.terminal_fg, theme.terminal_bg, theme.palette)
