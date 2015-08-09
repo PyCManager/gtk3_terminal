@@ -1,4 +1,5 @@
 import test_theme
+from os.path import expanduser
 
 
 name_application = "Nameless terminal"
@@ -35,7 +36,9 @@ terminal_scrollback	= 9999
 terminal_encoding	= "UTF-8"
 terminal_scroll_output 	= True
 terminal_scroll_key 	= True
-terminal_default_path 	= "HOME"
+terminal_default_path 	= expanduser("~")
+terminal_print_working_dir_path = False
+terminal_print_working_dir = True
 
 launch_command_new_term = 0
 

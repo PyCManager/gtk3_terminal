@@ -24,6 +24,7 @@ class TestMainBox(gtk.Box):
 		self.nb_terminals	= 0
 		self.nb_active_term	= -1
 		self.path_open_terminal = config.terminal_default_path
+		self.working_dir = config.terminal_default_path
 		
 		self.create_term_box()
 		self.create_tool_box()
@@ -42,8 +43,14 @@ class TestMainBox(gtk.Box):
 	
 	
 	def add_new_term(self, tab_label):
-		self.terminal_list = self.term_box.create_term(self.terminal_list, self.path_open_terminal)
+		
 		self.tab_list = self.tool_box.tab_box.add_tab(tab_label, self.tab_list)
+		if self.nb_terminals >= 1:
+			self.set_tab_label()
+			
+		if self.working_dir != config.terminal_default_path:
+			self.path_open_terminal = self.working_dir
+		self.terminal_list = self.term_box.create_term(self.terminal_list, self.path_open_terminal)
 
 		self.nb_terminals = len(self.terminal_list)
 		print("nb_terminals:", self.nb_terminals)
@@ -71,9 +78,30 @@ class TestMainBox(gtk.Box):
 			
 		self.active_term.grab_focus()
 		self.active_term.connect("child-exited", self.on_term_child_exited)
+		self.active_term.connect("text-deleted", self.on_text_deleted)
 		
+		self.set_tab_label()
 		self.show_all()
+	
+	
+	def set_tab_label(self):
+#		Doesn't work, apparently a bug in vte
+#		self.working_dir = self.active_term.get_current_directory_uri()
+		self.active_term_pid = self.active_term.pid[1]
+		self.working_dir = os.readlink('/proc/%s/cwd' % self.active_term_pid)
+		tab_label = self.nb_active_term
+		if self.working_dir != config.terminal_default_path:
+			if config.terminal_print_working_dir_path:
+				tab_label = self.working_dir
+			elif config.terminal_print_working_dir:
+				tab_label = os.path.basename(self.working_dir)
 
+		self.tab_list[self.nb_active_term].set_label(str(tab_label))
+	
+
+	def on_text_deleted(self, term):
+		self.set_tab_label()
+	
 
 	def on_term_child_exited(self, term, arg):
 		print("Action: Removing terminal:", self.nb_active_term)

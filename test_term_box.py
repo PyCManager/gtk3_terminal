@@ -44,9 +44,9 @@ class TestTerminal(vte.Terminal):
 	def __init__(self, theme, path_open_terminal):
 		vte.Terminal.__init__(self)
 		self.set_name("terminal")
-		self.spawn_sync(
+		self.pid = self.spawn_sync(
 				vte.PtyFlags.DEFAULT,
-				os.environ[path_open_terminal],
+				path_open_terminal,
 				[config.default_shell],
 				[],
 				glib.SpawnFlags.DO_NOT_REAP_CHILD,
