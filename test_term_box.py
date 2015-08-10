@@ -60,12 +60,11 @@ class TestTerminal(vte.Terminal):
 		self.set_scroll_on_keystroke(config.terminal_scroll_key)
 		self.set_mouse_autohide(config.terminal_mouse_autohide)
 		
-		if theme.theme_used != "default":
-			self.set_colors(theme.terminal_fg, theme.terminal_bg, theme.palette)
-			self.set_color_cursor(theme.terminal_cursor)
-			self.set_cursor_shape(theme.terminal_cursor_shape)
-#			self.set_color_highlight(theme.terminal_highlight_bg)
-#			self.set_color_highlight_foreground(theme.terminal_highlight_fg)
+#		if theme.theme_used != "default":
+		self.set_colors(theme.terminal_fg, theme.terminal_bg, theme.palette)
+		self.set_color_cursor(theme.terminal_cursor)
+		self.set_cursor_shape(theme.terminal_cursor_shape)
+
 		
 		if theme.terminal_bg_image != "":
 			self.set_background_image_file(theme.terminal_bg_image)  

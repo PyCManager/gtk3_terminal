@@ -52,3 +52,5 @@ bindkey	';3B'	beginning-of-line
 bindkey	';3C'	beginning-of-line
 #Alt + Left
 bindkey	';3D'	beginning-of-line
+#F11
+bindkey '^[[23~' beginning-of-line

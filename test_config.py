@@ -1,21 +1,29 @@
-import test_theme
+from gi.repository import Gtk as gtk, Vte as vte
 from os.path import expanduser
+import test_theme
 
 
-name_application = "Nameless terminal"
+title_application = "Nameless terminal"
+subtitle_application = "Version 0.92"
 default_shell 	= "/usr/bin/zsh"
 theme_list = [ "default", "solarized_dark", "solarized_light" ]
-default_theme 	= theme_list[1]
+default_theme = theme_list[1]
 
 path_to_css = "./themes/"
 path_to_icons = "./icons/"
 file_window_state = "./config/window_state"
+file_config = "./test_config.py"
+delimiter = " = "
 
-window_default_width 	= 1000
-window_default_height 	= 500
-window_opacity 		= 0.90
+window_default_width = 1000
+window_default_height = 500
+window_state = [(13, 436), (838, 426)]
+window_opacity = 0.90
 window_restore_state = True
 #window_opacity 	= 1
+main_menu_opacity = 0.90
+main_menu_halign = gtk.Align.CENTER
+main_menu_show_icons = True
 
 show_close_button = True
 show_tab_hscrollbar = False
@@ -32,18 +40,22 @@ sensibility_scroll = 4
 
 
 shortcut_dict = {	"<Alt>Up" : "accel_new_term", "<Control>T" : "accel_new_term",
-					"<Alt>Left" : "accel_prev_term", "<Alt>Right" : "accel_next_term"}
+					"<Alt>Left" : "accel_prev_term", "<Alt>Right" : "accel_next_term",
+					"F11" : "accel_fullscreen"}
 
 terminal_scrollback	= 9999
-terminal_encoding	= "UTF-8"
-terminal_scroll_output 	= True
-terminal_scroll_key 	= True
-terminal_default_path 	= expanduser("~")
+terminal_encoding = "UTF-8"
+terminal_scroll_output = True
+terminal_scroll_key = True
+terminal_default_path = expanduser("~")
 terminal_print_working_dir_path = False
 terminal_print_working_dir = True
 terminal_open_tab_working_dir = True
 terminal_deleted_activate_prev = True
 terminal_mouse_autohide = True
+terminal_bg_image = ""
+#Can be IBEAM or BLOCK
+terminal_cursor_shape = vte.CursorShape.UNDERLINE
 
 #Cleaning is a hack to hide a white 1px bar around tool_box when using a dark theme
 launch_command_new_term = "clear\n"
