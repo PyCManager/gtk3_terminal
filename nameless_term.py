@@ -87,6 +87,13 @@ class TestMainBox(gtk.Box):
 		self.parent.active_term = self.active_term
 		
 		self.set_tab_label()
+#		print("Working dir:", self.working_dir)
+		if config.path_in_subtitle:
+			self.parent.parent.header_bar.set_subtitle(self.working_dir)
+		
+		self.active_term.set_colors(theme.terminal_fg, theme.terminal_bg, theme.palette)
+		self.active_term.set_color_cursor(theme.terminal_cursor)
+		self.active_term.set_cursor_shape(theme.terminal_cursor_shape)
 		self.show_all()
 		
 	
@@ -108,6 +115,9 @@ class TestMainBox(gtk.Box):
 
 	def on_text_deleted(self, term):
 		self.set_tab_label()
+		if config.path_in_subtitle:
+			self.parent.parent.header_bar.set_subtitle(self.working_dir)
+			self.show_all()
 	
 
 	def on_term_child_exited(self, term, arg):
@@ -198,6 +208,7 @@ class MainWindow(gtk.ApplicationWindow):
 	def __init__(self, app):
 		gtk.Window.__init__(self, title="test", type=gtk.WindowType.TOPLEVEL, application=app)
 		self.set_name("main_window")
+		self.parent = app
 
 		self.connect("delete-event", gtk.main_quit)
 		self.connect("window-state-event", self.on_window_state_event)
@@ -374,7 +385,9 @@ class TestApp(gtk.Application):
 		self.main_window = MainWindow(self)
 		self.restore_window_state(config.window_restore_state)
 		self.main_window.set_titlebar(self.header_bar)
-		self.create_main_menu()
+#		self.create_main_menu()
+		self.create_popover_menu()
+#		self.create_app_menu()
 		self.main_box = self.main_window.main_box
 
 		self.add_window(self.main_window)
@@ -384,14 +397,23 @@ class TestApp(gtk.Application):
 	def do_startup(self):
 		gtk.Application.do_startup(self)
 		signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 		self.connect_actions()
+		
+		if config.restore_night_mode:
+			self.night_mode_state = config.night_mode_state
+			print("Night mode:", self.night_mode_state)
+			gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", self.night_mode_state)
+		print("Night mode:", self.night_mode_state)
+		
+	
 #		self.load_shortcuts()
 		
 		
 	def connect_actions(self):
-		fullscreen_action = gio.SimpleAction.new("on_fullscreen_activated", None)
-		fullscreen_action.connect("activate", self.on_fullscreen_activated)
-		self.add_action(fullscreen_action)
+#		fullscreen_action = gio.SimpleAction.new("on_fullscreen_activated", None)
+#		fullscreen_action.connect("activate", self.on_fullscreen_activated)
+#		self.add_action(fullscreen_action)
 		
 		preferences_action = gio.SimpleAction.new("on_preferences_activated", None)
 		preferences_action.connect("activate", self.on_preferences_activated)
@@ -426,44 +448,96 @@ class TestApp(gtk.Application):
 			self.main_window.set_default_size(config.window_default_width, config.window_default_height)
 		
 		
-	def create_main_menu(self):
+#	def create_app_menu(self):
+#		self.app_menu = self.main_menu
+#		self.app_menu.set_label("Nameless Term")
+#		self.set_app_menu(self.main_menu)
+		
+	
+	def create_popover_menu(self):
 		self.button_menu = gtk.MenuButton()
 		image = theme.get_image("header_menu")
 		self.button_menu.add(image)
+
+		self.builder_popover_menu = gtk.Builder()
+		self.builder_popover_menu.add_from_file(config.file_ui_popover_menu)
+
+		self.builder_theme_submenu = gtk.Builder()
+		self.builder_theme_submenu.add_from_file(config.file_ui_theme_submenu)
+
+		self.popover_menu = self.builder_popover_menu.get_object("popover_menu")
+		self.button_menu.set_popover(self.popover_menu)
+				
+		self.button_theme_submenu = self.builder_popover_menu.get_object("button_theme_submenu")
+		self.popover_theme_submenu = self.builder_theme_submenu.get_object("popover_theme_submenu")
+		self.button_theme_submenu.set_popover(self.popover_theme_submenu)
+		
+		
+		self.button_fullscreen = self.builder_popover_menu.get_object("button_fullscreen")
+		image = theme.get_image("fullscreen")
+		self.button_fullscreen.add(image)
+		self.button_fullscreen.show_all()
+		self.button_fullscreen.set_name("button_fullscreen")
+		
+		self.button_night_mode = self.builder_popover_menu.get_object("button_night_mode")
+		image = theme.get_image("night_mode")
+		self.button_night_mode.add(image)
+		self.button_night_mode.show_all()
+		self.button_night_mode.set_name("button_night_mode")
+
+		if config.override_menu_relief:
+			self.button_fullscreen.set_relief(theme.relief_button_main_menu)
+			self.button_night_mode.set_relief(theme.relief_button_main_menu)
+			
+			
+		self.action_fullscreen = gio.SimpleAction.new_stateful("fullscreen",
+									 None, glib.Variant.new_boolean(False))
+		self.action_fullscreen.connect("change-state", self.toggle_fullscreen)
+		self.add_action(self.action_fullscreen)
+
+		
+		self.action_night_mode = gio.SimpleAction.new_stateful("toggle_night", 
+						None, glib.Variant.new_boolean(self.night_mode_state))
+		self.action_night_mode.connect("change-state", self.toggle_night_mode)
+		self.add_action(self.action_night_mode)
+		
+		
+#		Connecting the actions of each themes of the submenu
+
+		self.actions_theme = []
+		for theme_name in config.theme_list:
+			if theme_name == theme.theme_used:
+				action_state = True
+			else:
+				action_state = False
+			action_name = "theme_" + theme_name
+			print("Theme:", theme_name)
+			action_theme = gio.SimpleAction.new_stateful(action_name, 
+						None, glib.Variant.new_boolean(action_state))
+			action_theme.connect("change-state", self.change_current_theme, theme_name)
+			self.add_action(action_theme)
+			self.actions_theme.append(action_theme)
+			
 		
 		self.button_save_state = gtk.Button("Save")
 		self.button_save_state.connect("clicked", self.on_button_save_state_clicked)
-	
-		self.main_menu = gio.Menu()
-		self.button_menu.set_menu_model(self.main_menu)
-		
-		self.theme_submenu = gio.Menu()		
-		self.theme_submenu.append("Default", "app.theme_default")
-		self.theme_submenu.append("Solarized light", "app.theme_solarized_light")
-		self.theme_submenu.append("Solarized dark", "app.theme_solarized_dark")
 
-		self.main_menu.append("Fullscreen", "app.on_fullscreen_activated")
-		self.main_menu.append_submenu("Theme", self.theme_submenu)
-		self.main_menu.append("Preferences", "app.on_preferences_activated")
-
-		
 		self.header_bar.box_end.add(self.button_save_state)		
 		self.header_bar.box_end.add(self.button_menu)
-#		self.header_bar.pack_end(self.box_end)
 
 
-	def on_button_save_state_clicked(self, widget):
-		print("Saving window state")
-		self.main_window.window_state = []
-		self.main_window.window_state.append(self.main_window.get_position())
-		self.main_window.window_state.append(self.main_window.get_size())
-		new_line = str(self.main_window.window_state)
-		self.replace_line(config.file_config, "window_state", new_line)
-		
-		
-	def change_current_theme(self, action, arg, theme_name):
+	def change_current_theme(self, action, state, theme_name):
 		global theme
 		print("Setting theme:", theme_name)
+		
+		for action_theme in self.actions_theme:
+#			print("THEME:", action_theme)
+			if action_theme == action:
+				state = glib.Variant.new_boolean(True)
+			else:
+				state = glib.Variant.new_boolean(False)
+			action_theme.set_state(state)
+
 		theme = test_theme.TestTheme(theme_name)
 		self.main_window.load_css(theme.css_file)
 		self.main_window.main_box.term_box.theme = theme
@@ -478,12 +552,11 @@ class TestApp(gtk.Application):
 		self.replace_line(config.file_config, "default_theme", new_line)
 
 
-	def on_preferences_activated(self, widget, arg):
-		print("Opening the preferences")
+	def toggle_fullscreen(self, action, state):
+		print("toggling fullscreen mode")
+		state = glib.Variant.new_boolean(self.main_window.is_fullscreen)
+		self.action_fullscreen.set_state(state)
 		
-		
-	def on_fullscreen_activated(self, widget, arg):
-		print("Going in Fullscreen mode")
 		if self.main_window.is_fullscreen:
 			self.main_window.unfullscreen()
 			self.main_window.active_term.grab_focus()
@@ -491,9 +564,75 @@ class TestApp(gtk.Application):
 			self.main_window.fullscreen()
 			self.main_window.set_focus(self.main_window.active_term)
 			self.main_window.active_term.grab_focus()
+
+
+	def toggle_night_mode(self, action, state):
+		print("Toggling night mode")
+		self.night_mode_state = not self.night_mode_state
+		state = glib.Variant.new_boolean(self.night_mode_state)
+		self.action_night_mode.set_state(state)
+			
+		gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", state)
+		new_line = str(self.night_mode_state)
+		self.replace_line(config.file_config, "night_mode_state", new_line)
+
+
+#	def create_main_menu(self):
+#		self.button_menu = gtk.MenuButton()
+#		image = theme.get_image("header_menu")
+#		self.button_menu.add(image)
+#		
+#	
+#		self.main_menu = gio.Menu()
+##		self.main_menu.modify_bg()
+#		self.button_menu.set_menu_model(self.main_menu)
+#		
+#		self.theme_submenu = gio.Menu()		
+#		self.theme_submenu.append("Default", "app.theme_default")
+#		self.theme_submenu.append("Solarized light", "app.theme_solarized_light")
+#		self.theme_submenu.append("Solarized dark", "app.theme_solarized_dark")
+
+#		self.main_menu.append("Fullscreen", "app.on_fullscreen_activated")
+#		self.main_menu.append_submenu("Theme", self.theme_submenu)
+#		self.main_menu.append("Preferences", "app.on_preferences_activated")
+#		
+#		
+#		self.button_save_state = gtk.Button("Save")
+#		self.button_save_state.connect("clicked", self.on_button_save_state_clicked)
+#		
+#		self.header_bar.box_end.add(self.button_save_state)		
+#		self.header_bar.box_end.add(self.button_menu)
+##		self.header_bar.pack_end(self.box_end)
+
+
+	def on_button_save_state_clicked(self, widget):
+		print("Saving window state")
+		self.main_window.window_state = []
+		self.main_window.window_state.append(self.main_window.get_position())
+		self.main_window.window_state.append(self.main_window.get_size())
+		new_line = str(self.main_window.window_state)
+		self.replace_line(config.file_config, "window_state", new_line)
+		
+
+	def on_preferences_activated(self, widget, arg):
+		print("Opening the preferences")
+		
+		
+#	def on_fullscreen_activated(self, widget, arg):
+#		print("Going in Fullscreen mode")
+#		if self.main_window.is_fullscreen:
+#			self.main_window.unfullscreen()
+#			self.main_window.active_term.grab_focus()
+#		else:
+#			self.main_window.fullscreen()
+#			self.main_window.set_focus(self.main_window.active_term)
+#			self.main_window.active_term.grab_focus()
 		
 		
 	def on_test_activated(self, widget, arg):
+		print("Test is a success !")
+		
+	def on_button_test_clicked(self, widget, arg):
 		print("Test is a success !")
 		
 		
@@ -504,7 +643,7 @@ class TestApp(gtk.Application):
 		with open(file_name, "w") as f:
 			for line in data:
 				if self.is_in_line(line, value_name):
-					print("FOUND:", line, end="")
+					print("Found config:", line, end="")
 					new_line = value_name + config.delimiter + new_value
 					print("Replaced by:", new_line)
 					print(new_line, file=f, end="\n")
@@ -520,4 +659,5 @@ class TestApp(gtk.Application):
 if __name__ == '__main__':
 	app = TestApp()
 	app.run(sys.argv)
+
 

@@ -1,0 +1,69 @@
+<interface>
+	<object class="GtkPopoverMenu" id ="popover_menu">
+		<property name="hexpand">False</property>
+		<property name="vexpand">False</property>
+		<property name="halign">end</property>
+<!--		<property name="valign">end</property>-->
+		<child>
+			<object class="GtkBox">
+				<property name="visible">True</property>
+				<property name="margin">10</property>
+				<property name="orientation">vertical</property>
+				
+				<child>
+					<object class="GtkBox">
+						<property name="visible">True</property>
+						<property name="margin">10</property>
+						<property name="homogeneous">True</property>
+						<property name="orientation">horizontal</property>
+						
+						<child>
+							<object class="GtkButton" id="button_fullscreen">
+								<property name="action-name">app.fullscreen</property>
+								<property name="visible">True</property>
+								<property name="can_focus">False</property>
+								<property name="tooltip_text" translatable="yes">Toggle fullscreen mode</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkButton" id="button_night_mode">
+								<property name="action-name">app.toggle_night</property>
+								<property name="visible">True</property>
+								<property name="can_focus">False</property>
+								<property name="tooltip_text" translatable="yes">Toggle night mode</property>
+							</object>
+						</child>
+					</object>
+				</child>
+<!--				<child>-->
+<!--					<object class="GtkSeparator">-->
+<!--						<property name="visible">True</property>-->
+<!--						<property name="orientation">horizontal</property>-->
+<!--					</object>-->
+<!--				</child>-->
+
+				<child>
+					<object class="GtkMenuButton" id="button_theme_submenu">
+						<property name="visible">True</property>
+						<property name="use_popover">True</property>
+						<property name="can_focus">False</property>
+						<property name="direction">left</property>
+						<property name="label" translatable="yes">Theme</property>
+					</object>
+				</child>
+				
+			</object>
+		</child>
+	</object>
+
+	
+	
+	<object class="GtkImage" id="menu_image">
+		<property name="visible">True</property>
+		<property name="icon_name">open-menu-symbolic</property>
+	</object>
+
+
+	
+	
+</interface>

@@ -1,0 +1,70 @@
+<interface>
+	<object class="GtkPopoverMenu" id ="popover_theme_submenu">
+		<property name="hexpand">False</property>
+		<property name="vexpand">False</property>
+<!--		<property name="valign">start</property>-->
+		<child>
+			<object class="GtkBox">
+				<property name="visible">True</property>
+				<property name="margin">12</property>
+				<property name="orientation">vertical</property>
+				<child>
+					<object class="GtkModelButton" id="test2">
+						<property name="action-name">app.toggle_night</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+						<property name="halign">end</property>
+						<property name="margin-top">3</property>
+						<property name="margin-bottom">3</property>
+						<property name="label" translatable="yes">Night Mode</property>
+					</object>
+					<packing>
+						<property name="position">0</property>
+					</packing>
+				</child>
+				<child>
+					<object class="GtkModelButton" id="theme_default">
+						<property name="action-name">app.theme_default</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+						<property name="halign">end</property>
+						<property name="margin-top">3</property>
+						<property name="margin-bottom">3</property>
+						<property name="label" translatable="yes">Default</property>
+					</object>
+					<packing>
+						<property name="position">1</property>
+					</packing>
+				</child>
+				<child>
+					<object class="GtkModelButton" id="theme_solarized_dark">
+						<property name="action-name">app.theme_solarized_dark</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+						<property name="halign">end</property>
+						<property name="margin-top">3</property>
+						<property name="margin-bottom">3</property>
+						<property name="label" translatable="yes">Solarized Dark</property>
+					</object>
+					<packing>
+						<property name="position">2</property>
+					</packing>
+				</child>
+				<child>
+					<object class="GtkModelButton" id="theme_solarized_light">
+						<property name="action-name">app.theme_solarized_light</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+						<property name="halign">end</property>
+						<property name="margin-top">3</property>
+						<property name="margin-bottom">3</property>
+						<property name="label" translatable="yes">Solarized Light</property>
+					</object>
+					<packing>
+						<property name="position">3</property>
+					</packing>
+				</child>
+			</object>
+		</child>
+	</object>
+</interface>

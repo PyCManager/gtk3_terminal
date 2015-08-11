@@ -5,12 +5,13 @@ import os
 path_to_css = config.path_to_css
 path_to_icons = config.path_to_icons
 
-icon_dict = { 	"new_term" : "tab-new-symbolic", 
-				"close_term" : "edit-delete-symbolic",
-				"header_menu" : "open-menu-symbolic",
-				"tab_menu" : "open-menu-symbolic",
-				"fullscreen": "view-fullscreen-symbolic",
-				"preferences": "system-run-symbolic"}
+icon_dict = { 	"new_term" 		: "tab-new-symbolic", 
+				"close_term" 	: "edit-delete-symbolic",
+				"header_menu" 	: "open-menu-symbolic",
+				"tab_menu" 		: "open-menu-symbolic",
+				"fullscreen" 	: "view-fullscreen-symbolic",
+				"preferences" 	: "system-run-symbolic",
+				"night_mode" 	: "object-inverse"}
 
 
 
@@ -57,6 +58,7 @@ class TestTheme(object):
 			print("Using default theme")
 			self.relief_button_shortcut_box = gtk.ReliefStyle.NORMAL
 			self.relief_button_tab_box = gtk.ReliefStyle.NORMAL
+			self.relief_button_main_menu = gtk.ReliefStyle.NORMAL
 		
 		elif theme_name == "solarized_dark":
 			self.c_1 = c_base01
@@ -74,6 +76,7 @@ class TestTheme(object):
 			icon_dict["preferences"] = "preferences_solarized_dark"
 			self.relief_button_shortcut_box = gtk.ReliefStyle.NONE
 			self.relief_button_tab_box = gtk.ReliefStyle.NONE
+			self.relief_button_main_menu = gtk.ReliefStyle.NONE
 			
 		elif theme_name == "solarized_light":
 			self.c_1 = c_base01
@@ -104,12 +107,12 @@ class TestTheme(object):
 	
 	
 	def get_image(self, image_name):
-		image_name = path_to_icons + icon_dict[image_name] + ".svg"
-		if os.path.isfile(image_name):
+		image_path = path_to_icons + icon_dict[image_name] + ".svg"
+		if os.path.isfile(image_path):
 			try:
-				image = gtk.Image.new_from_file(image_name)
+				image = gtk.Image.new_from_file(image_path)
 			except Exception:
-				print("Exception opening file:", image_name)
+				print("Exception opening file:", image_path)
 		else:
 			image_name = icon_dict[image_name]
 			icon = gio.ThemedIcon(name=image_name)

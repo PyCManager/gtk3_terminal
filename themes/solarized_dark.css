@@ -1,18 +1,63 @@
-#main_menu{
-	background-color: #002b36;
-}
+@define-color c_base03 		#002B36;
+@define-color c_base02 		#073642;
+@define-color c_base01 		#586e75;
+@define-color c_base00 		#657b83;
+@define-color c_base0 		#839496;
+@define-color c_base1 		#93a1a1;
+@define-color c_base2 		#eee8d5;
+@define-color c_base3 		#fdf6e3;
+@define-color c_yellow 		#b58900;
+@define-color c_orange 		#cb4b16;
+@define-color c_red 		#dc322f;
+@define-color c_magenta 	#d33682;
+@define-color c_violet 		#6c71c4;
+@define-color c_blue 		#268bd2;
+@define-color c_cyan 		#2aa198;
+@define-color c_green 		#859900;
+@define-color c_black 		#000000;
+@define-color c_white 		#ffffff;
+
+@define-color header_bar 	#002B36;
+
+/*#main_menu{*/
+/*	background-color: #002b36;*/
+/*}*/
 
 #main_menu GtkButton{
 /*	background-color: #F00;*/
 /*	border-width: 5px;*/
 /*	border-style: solid;*/
 /*	border-color: #F0F;*/
-	padding: 0px 16px 0px 16px;
+/*	padding: 0px 16px 0px 16px;*/
 }
 
 #main_menu GtkLabel{
 	color: #586e75;
 }
+
+GtkApplication .titlebar,
+GtkApplication .header-bar {
+    background-color: #F00;
+}
+
+#header_bar{
+    background-color: @header_bar;
+}
+
+
+
+/*#button_fullscreen{*/
+/*	background-image: none;*/
+/*	background-color: #F00;*/
+/*}*/
+
+/*GtkMenuButton GtkButton{*/
+/*	background-image: none;*/
+/*	background-color: #F00;*/
+/*	border-width: 5px;*/
+/*	border-style: solid;*/
+/*	border-color: #F0F;*/
+/*}*/
 
 #tool_box{
 	background-color: #5c3566;
