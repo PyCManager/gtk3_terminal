@@ -1,9 +1,9 @@
 #! /usr/bin/python
 
-from gi.repository import Gtk as gtk, Vte as vte, Gdk as gdk, Gio as gio, GLib as glib, Keybinder
+from gi.repository import Gtk as gtk, Vte as vte, Gdk as gdk, Gio as gio, GLib as glib, Keybinder, Notify
 import test_theme, test_config as config, test_term_box, test_tool_box
 import signal
-import json
+#import json
 import sys
 import re
 import os
@@ -184,22 +184,22 @@ class TestMainBox(gtk.Box):
 
 
 
-class TestHeaderBar(gtk.HeaderBar):
+#class TestHeaderBar(gtk.HeaderBar):
 
-	def __init__(self, parent, app):
-		gtk.Window.__init__(self)
-		
-		self.props.title = config.title_application
-		self.set_subtitle(config.subtitle_application)
-		self.set_name("header_bar")
-		self.parent = parent
+#	def __init__(self, parent, app):
+#		gtk.Window.__init__(self)
+#		
+#		self.props.title = config.title_application
+#		self.set_subtitle(config.subtitle_application)
+#		self.set_name("header_bar")
+#		self.parent = parent
 
-		self.set_show_close_button(config.show_close_button)
+#		self.set_show_close_button(config.show_close_button)
 
-		self.box_end = gtk.Box(orientation=gtk.Orientation.HORIZONTAL)
-		gtk.StyleContext.add_class(self.box_end.get_style_context(), "linked")
-		
-		self.pack_end(self.box_end)
+#		self.box_end = gtk.Box(orientation=gtk.Orientation.HORIZONTAL)
+#		gtk.StyleContext.add_class(self.box_end.get_style_context(), "linked")
+#		
+#		self.pack_end(self.box_end)
 
 	
 
@@ -281,10 +281,28 @@ class MainWindow(gtk.ApplicationWindow):
 		
 	def accel_fullscreen(self, accel_group, window, key, mod):
 		print("Accelerator for fullscreen")
+		state = glib.Variant.new_boolean(self.is_fullscreen)
+		self.parent.action_fullscreen.set_state(state)
+		
 		if self.is_fullscreen:
 			self.unfullscreen()
+			self.parent.header_bar.show()
+			self.active_term.grab_focus()
 		else:
+			Notify.init(config.title_application)
+			notification_fullscreen = Notify.Notification.new(config.title_application, 
+															"App is in fullscreen, press F11 to quit", 
+															"view-fullscreen-symbolic")
+			notification_fullscreen.add_action("app.toggle_fullscreen",
+												"toggle_fullscreen",
+												app.toggle_fullscreen,
+												None,
+												None)
+			notification_fullscreen.show()
 			self.fullscreen()
+			self.parent.header_bar.hide()
+			self.set_focus(self.active_term)
+			self.active_term.grab_focus()
 		
 
 	def on_focus_in_event(self, window, event):
@@ -381,14 +399,9 @@ class TestApp(gtk.Application):
 		
 	def activate_app(self, app):
 
-		self.header_bar = TestHeaderBar(self, app)
-		self.main_window = MainWindow(self)
+		self.create_main_window()
 		self.restore_window_state(config.window_restore_state)
-		self.main_window.set_titlebar(self.header_bar)
-#		self.create_main_menu()
-		self.create_popover_menu()
-#		self.create_app_menu()
-		self.main_box = self.main_window.main_box
+		self.create_app_menu()
 
 		self.add_window(self.main_window)
 		self.main_window.show_all()
@@ -398,67 +411,39 @@ class TestApp(gtk.Application):
 		gtk.Application.do_startup(self)
 		signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-		self.connect_actions()
-		
 		if config.restore_night_mode:
 			self.night_mode_state = config.night_mode_state
 			print("Night mode:", self.night_mode_state)
 			gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", self.night_mode_state)
-		print("Night mode:", self.night_mode_state)
-		
 	
-#		self.load_shortcuts()
-		
-		
-	def connect_actions(self):
-#		fullscreen_action = gio.SimpleAction.new("on_fullscreen_activated", None)
-#		fullscreen_action.connect("activate", self.on_fullscreen_activated)
-#		self.add_action(fullscreen_action)
-		
-		preferences_action = gio.SimpleAction.new("on_preferences_activated", None)
-		preferences_action.connect("activate", self.on_preferences_activated)
-		self.add_action(preferences_action)
 
-		theme_action_default = gio.SimpleAction.new("theme_default", None)
-		theme_action_default.connect("activate", self.change_current_theme, "default")
-		self.add_action(theme_action_default)
-
-		theme_action_solarized_light = gio.SimpleAction.new("theme_solarized_light", None)
-		theme_action_solarized_light.connect("activate", self.change_current_theme, "solarized_light")
-		self.add_action(theme_action_solarized_light)
-
-		theme_action_solarized_dark = gio.SimpleAction.new("theme_solarized_dark", None)
-		theme_action_solarized_dark.connect("activate", self.change_current_theme, "solarized_dark")
-		self.add_action(theme_action_solarized_dark)
-			
+	def create_main_window(self):
+#		self.builder_main_window = gtk.Builder()
+#		self.builder_main_window.add_from_file(config.file_ui_main_window)	
+#		self.main_window = self.builder_main_window.get_object("main_window")
+		self.main_window = MainWindow(self)
+		self.create_header_bar()
+		self.main_window.set_titlebar(self.header_bar)	
 	
-	def restore_window_state(self, restore_state):
-		if restore_state:
-			print("Restoring window state")
-			print("Current position:", self.main_window.get_position())
-			print("Current size:", self.main_window.get_size())
-			data = config.window_state
-			self.window_position = data[0]
-			self.window_size = data[1]
-			print("position:", data[0])
-			print("size:", data[1])
-			self.main_window.move(self.window_position[0], self.window_position[1])
-			self.main_window.set_default_size(self.window_size[0], self.window_size[1])
-		else:
-			self.main_window.set_default_size(config.window_default_width, config.window_default_height)
+	
+	def create_header_bar(self):
+		self.builder_header_bar = gtk.Builder()
+		self.builder_header_bar.add_from_file(config.file_ui_header_bar)
+
+		self.header_bar = self.builder_header_bar.get_object("header_bar")
+		self.button_header_menu = self.builder_header_bar.get_object("button_header_menu")
 		
-		
-#	def create_app_menu(self):
-#		self.app_menu = self.main_menu
-#		self.app_menu.set_label("Nameless Term")
-#		self.set_app_menu(self.main_menu)
-		
+		if config.rename_application:
+			self.header_bar.props.title = config.title_application
+			self.header_bar.set_subtitle(config.subtitle_application)
+		self.header_bar.set_name("header_bar")
+
+		self.create_popover_menu()
+		self.button_header_menu.set_popover(self.popover_menu)
+		self.connect_actions_header_bar()
+	
 	
 	def create_popover_menu(self):
-		self.button_menu = gtk.MenuButton()
-		image = theme.get_image("header_menu")
-		self.button_menu.add(image)
-
 		self.builder_popover_menu = gtk.Builder()
 		self.builder_popover_menu.add_from_file(config.file_ui_popover_menu)
 
@@ -466,7 +451,6 @@ class TestApp(gtk.Application):
 		self.builder_theme_submenu.add_from_file(config.file_ui_theme_submenu)
 
 		self.popover_menu = self.builder_popover_menu.get_object("popover_menu")
-		self.button_menu.set_popover(self.popover_menu)
 				
 		self.button_theme_submenu = self.builder_popover_menu.get_object("button_theme_submenu")
 		self.popover_theme_submenu = self.builder_theme_submenu.get_object("popover_theme_submenu")
@@ -488,8 +472,35 @@ class TestApp(gtk.Application):
 		if config.override_menu_relief:
 			self.button_fullscreen.set_relief(theme.relief_button_main_menu)
 			self.button_night_mode.set_relief(theme.relief_button_main_menu)
-			
-			
+				
+		self.connect_actions_main_menu()
+		self.connect_actions_theme_submenu()
+		
+	
+	def create_app_menu(self):
+		
+		self.app_menu = gio.Menu()
+		
+		self.theme_submenu = gio.Menu()		
+		self.theme_submenu.append("Default", "app.theme_default")
+		self.theme_submenu.append("Solarized light", "app.theme_solarized_light")
+		self.theme_submenu.append("Solarized dark", "app.theme_solarized_dark")
+
+		self.app_menu.append("Fullscreen", "app.fullscreen")
+		self.app_menu.append_submenu("Theme", self.theme_submenu)
+		self.app_menu.append("Preferences", "app.on_preferences_activated")
+		
+		self.set_app_menu(self.app_menu)
+		
+		
+	def connect_actions_header_bar(self):
+		self.window_state = gio.SimpleAction.new_stateful("save_window_state",
+									 		None, glib.Variant.new_boolean(False))
+		self.window_state.connect("change-state", self.save_window_state)
+		self.add_action(self.window_state)
+	
+	
+	def connect_actions_main_menu(self):
 		self.action_fullscreen = gio.SimpleAction.new_stateful("fullscreen",
 									 None, glib.Variant.new_boolean(False))
 		self.action_fullscreen.connect("change-state", self.toggle_fullscreen)
@@ -500,10 +511,9 @@ class TestApp(gtk.Application):
 						None, glib.Variant.new_boolean(self.night_mode_state))
 		self.action_night_mode.connect("change-state", self.toggle_night_mode)
 		self.add_action(self.action_night_mode)
-		
-		
-#		Connecting the actions of each themes of the submenu
-
+	
+	
+	def connect_actions_theme_submenu(self):
 		self.actions_theme = []
 		for theme_name in config.theme_list:
 			if theme_name == theme.theme_used:
@@ -518,12 +528,30 @@ class TestApp(gtk.Application):
 			self.add_action(action_theme)
 			self.actions_theme.append(action_theme)
 			
-		
-		self.button_save_state = gtk.Button("Save")
-		self.button_save_state.connect("clicked", self.on_button_save_state_clicked)
-
-		self.header_bar.box_end.add(self.button_save_state)		
-		self.header_bar.box_end.add(self.button_menu)
+			
+	def restore_window_state(self, restore_state):
+		if restore_state:
+			print("Restoring window state")
+			print("Current position:", self.main_window.get_position())
+			print("Current size:", self.main_window.get_size())
+			data = config.window_state
+			self.window_position = data[0]
+			self.window_size = data[1]
+			print("position:", data[0])
+			print("size:", data[1])
+			self.main_window.move(self.window_position[0], self.window_position[1])
+			self.main_window.set_default_size(self.window_size[0], self.window_size[1])
+		else:
+			self.main_window.set_default_size(config.window_default_width, config.window_default_height)
+	
+	
+	def save_window_state(self, action, state):
+		print("Saving window state")
+		self.main_window.window_state = []
+		self.main_window.window_state.append(self.main_window.get_position())
+		self.main_window.window_state.append(self.main_window.get_size())
+		new_line = str(self.main_window.window_state)
+		self.replace_line(config.file_config, "window_state", new_line)
 
 
 	def change_current_theme(self, action, state, theme_name):
@@ -559,9 +587,22 @@ class TestApp(gtk.Application):
 		
 		if self.main_window.is_fullscreen:
 			self.main_window.unfullscreen()
+			self.header_bar.show()
 			self.main_window.active_term.grab_focus()
 		else:
+			Notify.init(config.title_application)
+			notification_fullscreen = Notify.Notification.new(config.title_application, 
+															"App is in fullscreen, press F11 to quit", 
+															"view-fullscreen-symbolic")
+			notification_fullscreen.add_action("app.toggle_fullscreen",
+												"toggle_fullscreen",
+												app.toggle_fullscreen,
+												None,
+												None)
+			notification_fullscreen.show()
+			
 			self.main_window.fullscreen()
+			self.header_bar.hide()
 			self.main_window.set_focus(self.main_window.active_term)
 			self.main_window.active_term.grab_focus()
 
@@ -603,30 +644,10 @@ class TestApp(gtk.Application):
 #		self.header_bar.box_end.add(self.button_save_state)		
 #		self.header_bar.box_end.add(self.button_menu)
 ##		self.header_bar.pack_end(self.box_end)
-
-
-	def on_button_save_state_clicked(self, widget):
-		print("Saving window state")
-		self.main_window.window_state = []
-		self.main_window.window_state.append(self.main_window.get_position())
-		self.main_window.window_state.append(self.main_window.get_size())
-		new_line = str(self.main_window.window_state)
-		self.replace_line(config.file_config, "window_state", new_line)
-		
+	
 
 	def on_preferences_activated(self, widget, arg):
 		print("Opening the preferences")
-		
-		
-#	def on_fullscreen_activated(self, widget, arg):
-#		print("Going in Fullscreen mode")
-#		if self.main_window.is_fullscreen:
-#			self.main_window.unfullscreen()
-#			self.main_window.active_term.grab_focus()
-#		else:
-#			self.main_window.fullscreen()
-#			self.main_window.set_focus(self.main_window.active_term)
-#			self.main_window.active_term.grab_focus()
 		
 		
 	def on_test_activated(self, widget, arg):

@@ -2,7 +2,7 @@ from gi.repository import Gtk as gtk, Vte as vte
 from os.path import expanduser
 import test_theme
 
-
+rename_application = True
 title_application = "Nameless terminal"
 subtitle_application = "Version 0.94"
 path_in_subtitle = False
@@ -16,6 +16,7 @@ path_to_css = "./themes/"
 path_to_icons = "./icons/"
 file_window_state = "./config/window_state"
 file_config = "./test_config.py"
+file_ui_main_window = "./ui/main_window.ui"
 file_ui_header_bar = "./ui/header_bar.ui"
 file_ui_popover_menu = "./ui/popover_menu.ui"
 file_ui_theme_submenu = "./ui/theme_submenu.ui"
@@ -24,7 +25,7 @@ delimiter = " = "
 
 window_default_width = 1000
 window_default_height = 500
-window_state = [(420, 447), (878, 459)]
+window_state = [(248, 441), (878, 459)]
 window_opacity = 0.90
 window_restore_state = True
 #window_opacity 	= 1

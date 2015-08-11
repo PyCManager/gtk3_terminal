@@ -1,0 +1,49 @@
+<interface>
+	<object class="GtkHeaderBar" id="header_bar">
+		<property name="visible">True</property>
+		<property name="title" translatable="yes">Preferences</property>
+		<property name="show-close-button">True</property>
+		<child>
+			<object class="GtkBox" id="header_box_end">
+				<property name="visible">True</property>
+<!--				<property name="margin">10</property>-->
+				<property name="homogeneous">True</property>
+				<property name="orientation">horizontal</property>
+				<child>
+					<object class="GtkButton" id="button_save_state">
+						<property name="action-name">app.save_window_state</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+						<property name="label" translatable="yes">Save</property>
+						<property name="tooltip_text" translatable="yes">Save window state</property>
+					</object>
+					<packing>
+						<property name="position">0</property>
+					</packing>
+				</child>
+				<child>
+					<object class="GtkMenuButton" id="button_header_menu">
+						<property name="visible">True</property>
+						<property name="use_popover">True</property>
+						<property name="can_focus">False</property>
+						<property name="direction">down</property>
+<!--						<property name="label" translatable="yes">Menu</property>-->
+						<property name="image">image_header_menu</property>
+						<property name="tooltip_text" translatable="yes">Open application menu</property>
+					</object>
+					<packing>
+						<property name="position">1</property>
+					</packing>
+				</child>
+			</object>
+			<packing>
+				<property name="pack-type">end</property>
+			</packing>
+		</child>
+	</object>
+	<object class="GtkImage" id="image_header_menu">
+		<property name="visible">True</property>
+		<property name="icon_name">open-menu-symbolic</property>
+	</object>
+</interface>
+
