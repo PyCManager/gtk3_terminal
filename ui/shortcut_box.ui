@@ -1,0 +1,56 @@
+<interface>
+	<object class="GtkEventBox" id="event_shortcut_box">
+		<property name="visible">True</property>
+		<property name="margin">0</property>
+		<property name="hexpand">False</property>
+		
+		<child>
+			<object class="GtkBox" id="shortcut_box">
+				<property name="visible">True</property>
+				<property name="margin">0</property>
+				<property name="orientation">horizontal</property>
+
+				<child>
+				
+					<object class="GtkButton" id="button_new_term">
+						<property name="action-name">app.new_term</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+<!--						<property name="label" translatable="yes">New Term</property>-->
+						<property name="image">image_new_term</property>
+						<property name="tooltip_text" translatable="yes">Open a new terminal</property>
+					</object>
+					<packing>
+						<property name="position">1</property>
+					</packing>
+				</child>
+				
+				<child>
+					<object class="GtkButton" id="button_close_term">
+						<property name="action-name">app.close_term</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+<!--						<property name="label" translatable="yes">New Term</property>-->
+						<property name="image">image_close_term</property>
+						<property name="tooltip_text" translatable="yes">Close current terminal</property>
+					</object>
+					<packing>
+						<property name="position">0</property>
+					</packing>
+				</child>
+				
+			</object>
+		</child>
+		
+	</object>
+	
+	<object class="GtkImage" id="image_new_term">
+		<property name="visible">True</property>
+		<property name="icon_name">tab-new-symbolic</property>
+	</object>
+	
+	<object class="GtkImage" id="image_close_term">
+		<property name="visible">True</property>
+		<property name="icon_name">edit-delete-symbolic</property>
+	</object>
+</interface>

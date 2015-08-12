@@ -1,0 +1,30 @@
+<interface>
+	<object class="GtkBox" id="tool_box">
+		<property name="visible">True</property>
+		<property name="orientation">horizontal</property>
+		<child>
+			<object class="GtkBox" id="tab_box">
+				<property name="visible">True</property>
+				<property name="homogeneous">True</property>
+				<property name="orientation">horizontal</property>
+				<child>
+					<placeholder/>
+				</child>
+			</object>
+			<packing>
+				<property name="pack-type">start</property>
+			</packing>
+		</child>
+		<child>
+			<object class="GtkBox" id="shortcut_box">
+				<property name="visible">True</property>
+				<property name="homogeneous">True</property>
+				<property name="orientation">horizontal</property>
+				<child>
+					<placeholder/>
+				</child>
+			</object>
+			<packing>
+				<property name="pack-type">end</property>
+			</packing>
+		</child>

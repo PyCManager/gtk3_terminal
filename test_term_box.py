@@ -16,6 +16,7 @@ class TestTermBox(gtk.Box):
 		self.theme = theme
 		self.scroll_window_term = gtk.ScrolledWindow()
 		self.scroll_window_term.set_name("scroll_window_term")
+#		self.scroll_window_term.set_shadow_type(gtk.ShadowType.NONE)
 
 		self.add(self.scroll_window_term)
 		self.show_all()

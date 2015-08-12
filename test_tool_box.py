@@ -1,4 +1,4 @@
-from gi.repository import Gtk as gtk, Gdk as gdk
+from gi.repository import Gtk as gtk
 import test_config as config
 
 
@@ -16,7 +16,7 @@ class TestToolBox(gtk.Box):
 		self.count_scroll_down = 0
 		
 		self.create_tab_box()
-		self.create_shortcut_box()
+#		self.create_shortcut_box()
 
 		
 	def create_tab_box(self):
@@ -101,22 +101,27 @@ class TestToolBox(gtk.Box):
 				self.count_scroll_down = 0
 				
 		
-	def create_shortcut_box(self):
-		self.shortcut_box = TestShortcutBox(self, self.theme)
+#	def create_shortcut_box(self):
+#		self.shortcut_box = TestShortcutBox(self, self.theme)
 #		print("SHORTCUT_BOX:", self.shortcut_box)
 #		print("SHORTCUT_BOX child:", self.shortcut_box.get_children())
 
-		self.shortcut_box.set_border_width(config.width_shortcut_box_border)
+#		self.shortcut_box.set_border_width(config.width_shortcut_box_border)
 		
-		self.event_shortcut_box = gtk.EventBox()
-		self.event_shortcut_box.set_name("event_shortcut_box")
-		self.event_shortcut_box.set_hexpand(False)
-		self.event_shortcut_box.add(self.shortcut_box)
-		
-		if config.tab_box_pack_start:
-			self.pack_end(self.event_shortcut_box, False, True, 0)
-		else:
-			self.pack_end(self.event_shortcut_box, False, True, 0)
+#		self.event_shortcut_box = gtk.EventBox()
+
+#		self.event_shortcut_box.set_name("event_shortcut_box")
+#		self.event_shortcut_box.set_hexpand(False)
+#		self.event_shortcut_box.add(self.shortcut_box)
+
+#		self.builder_shortcut_box = gtk.Builder()
+#		self.builder_shortcut_box.add_from_file(config.file_ui_shortcut_box)
+#		self.event_shortcut_box = self.builder_shortcut_box.get_object("event_shortcut_box")
+#		
+#		if config.tab_box_pack_start:
+#			self.pack_end(self.event_shortcut_box, False, True, 0)
+#		else:
+#			self.pack_start(self.event_shortcut_box, False, True, 0)
 	
 
 
@@ -155,49 +160,49 @@ class TestTabBox(gtk.Box):
 
 
 
-class TestShortcutBox(gtk.Box):
-	
-	def __init__(self, parent, theme): 
-		gtk.Box.__init__(self, orientation=gtk.Orientation.HORIZONTAL)
-		gtk.StyleContext.add_class(self.get_style_context(), "linked")
-		self.set_name("shortcut_box")
-		self.parent = parent
-		self.theme = theme
-		self.add_shortcuts()
-		
-		
-	def add_shortcuts(self):
-		self.button_new_term = gtk.Button()
-		image = self.theme.get_image("new_term")
-		self.button_new_term.add(image)
-		self.button_new_term.connect("clicked", self.on_button_new_term_clicked)
-		
-		self.button_close_term = gtk.Button()
-		image = self.theme.get_image("close_term")
-		self.button_close_term.add(image)
-		self.button_close_term.connect("clicked", self.on_button_close_term_clicked)
-		
-		self.button_menu = gtk.Button()
-		image = self.theme.get_image("tab_menu")
-		self.button_menu.add(image)
-		self.button_menu.connect("clicked", self.on_button_menu_clicked)
-		
+#class TestShortcutBox(gtk.Box):
+#	
+#	def __init__(self, parent, theme): 
+#		gtk.Box.__init__(self, orientation=gtk.Orientation.HORIZONTAL)
+#		gtk.StyleContext.add_class(self.get_style_context(), "linked")
+#		self.set_name("shortcut_box")
+#		self.parent = parent
+#		self.theme = theme
+#		self.add_shortcuts()
+#		
+#		
+#	def add_shortcuts(self):
+#		self.button_new_term = gtk.Button()
+#		image = self.theme.get_image("new_term")
+#		self.button_new_term.add(image)
+#		self.button_new_term.connect("clicked", self.on_button_new_term_clicked)
+#		
+#		self.button_close_term = gtk.Button()
+#		image = self.theme.get_image("close_term")
+#		self.button_close_term.add(image)
+#		self.button_close_term.connect("clicked", self.on_button_close_term_clicked)
+#		
+#		self.button_menu = gtk.Button()
+#		image = self.theme.get_image("tab_menu")
+#		self.button_menu.add(image)
+#		self.button_menu.connect("clicked", self.on_button_menu_clicked)
+#		
 
-		self.add(self.button_new_term)
-		self.add(self.button_close_term)
-		self.add(self.button_menu)
-	
-	def on_button_menu_clicked(self, widget):
-		print("Accessing menu")
-	
-	def on_button_new_term_clicked(self, widget):
-		print("Creating new terminal")
-		self.terminal_list = self.parent.parent.terminal_list
-		self.parent.parent.add_new_term(len(self.terminal_list))
+#		self.add(self.button_new_term)
+#		self.add(self.button_close_term)
+#		self.add(self.button_menu)
+#	
+#	def on_button_menu_clicked(self, widget):
+#		print("Accessing menu")
+#	
+#	def on_button_new_term_clicked(self, widget):
+#		print("Creating new terminal")
+#		self.terminal_list = self.parent.parent.terminal_list
+#		self.parent.parent.add_new_term(len(self.terminal_list))
 
 
-	def on_button_close_term_clicked(self, widget):
-		print("Closing active terminal")
-		self.nb_active_term = self.parent.parent.nb_active_term
-		self.parent.parent.remove_term(self.nb_active_term, False)
+#	def on_button_close_term_clicked(self, widget):
+#		print("Closing active terminal")
+#		self.nb_active_term = self.parent.parent.nb_active_term
+#		self.parent.parent.remove_term(self.nb_active_term, False)
 

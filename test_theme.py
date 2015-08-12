@@ -1,4 +1,4 @@
-from gi.repository import Gtk as gtk, Gdk as gdk, Gio as gio, Vte as vte
+from gi.repository import Gtk as gtk, Gdk as gdk, Gio as gio
 import test_config as config
 import os
 
@@ -11,7 +11,9 @@ icon_dict = { 	"new_term" 		: "tab-new-symbolic",
 				"tab_menu" 		: "open-menu-symbolic",
 				"fullscreen" 	: "view-fullscreen-symbolic",
 				"preferences" 	: "system-run-symbolic",
-				"night_mode" 	: "object-inverse"}
+				"night_mode" 	: "object-inverse",
+				"go_home" 		: "go-home-symbolic",
+				"exit_app" 		: "window-close-symbolic"}
 
 
 
@@ -60,20 +62,19 @@ class TestTheme(object):
 			self.relief_button_tab_box = gtk.ReliefStyle.NORMAL
 			self.relief_button_main_menu = gtk.ReliefStyle.NORMAL
 		
-		elif theme_name == "solarized_dark":
+		elif theme_name == "solarized_dark" or theme_name == "debug":
 			self.c_1 = c_base01
 			self.c_8 = c_base2
 			
 			self.terminal_bg = c_base03
 			self.terminal_fg = c_base0
 			self.terminal_cursor = c_cyan
+			
+			path_theme = theme_name + "/"
 
-			icon_dict["new_term"] = "new_term_solarized_dark"
-			icon_dict["close_term"] = "close_term_solarized_dark"
-			icon_dict["header_menu"] = "header_menu_solarized_light"
-			icon_dict["tab_menu"] = "tab_menu_solarized_dark"
-			icon_dict["fullscreen"] = "fullscreen_solarized_dark"
-			icon_dict["preferences"] = "preferences_solarized_dark"
+			for icon_name in icon_dict:
+				icon_dict[icon_name] = path_theme + icon_name
+
 			self.relief_button_shortcut_box = gtk.ReliefStyle.NONE
 			self.relief_button_tab_box = gtk.ReliefStyle.NONE
 			self.relief_button_main_menu = gtk.ReliefStyle.NONE
@@ -98,6 +99,38 @@ class TestTheme(object):
 		
 		self.css_file = path_to_css + theme_name + ".css"
 		
+	
+	def load_icons(self, app):
+		image = self.get_image("fullscreen")
+		app.button_fullscreen.get_child().destroy()
+		app.button_fullscreen.add(image)
+		app.button_fullscreen.show_all()
+		
+		image = self.get_image("night_mode")
+		app.button_night_mode.get_child().destroy()
+		app.button_night_mode.add(image)
+		app.button_night_mode.show_all()
+
+		image = self.get_image("header_menu")
+		app.button_header_menu.get_child().destroy()
+		app.button_header_menu.add(image)
+		app.button_header_menu.show_all()
+		
+		image = self.get_image("exit_app")
+		app.button_exit_app.get_child().destroy()
+		app.button_exit_app.add(image)
+		app.button_exit_app.show_all()
+		
+		image = self.get_image("new_term")
+		app.button_new_term.get_child().destroy()
+		app.button_new_term.add(image)
+		app.button_new_term.show_all()
+		
+		image = self.get_image("close_term")
+		app.button_close_term.get_child().destroy()
+		app.button_close_term.add(image)
+		app.button_close_term.show_all()
+	
 		
 	def hex_to_RGBA(self, hex_color):
 		RGBA_color = gdk.RGBA()
@@ -108,6 +141,7 @@ class TestTheme(object):
 	
 	def get_image(self, image_name):
 		image_path = path_to_icons + icon_dict[image_name] + ".svg"
+		print("IMG PATH:", image_path)
 		if os.path.isfile(image_path):
 			try:
 				image = gtk.Image.new_from_file(image_path)
