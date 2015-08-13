@@ -20,7 +20,10 @@ class TestApp(gtk.Application):
 	def do_activate(self):
 
 		self.create_main_window()
-		self.restore_window_state(config.window_restore_state)
+	
+		self.is_drop_down = config.is_drop_down
+		self.restore_window_state(config.window_restore_state)	
+		
 		self.create_app_menu()
 		self.create_shortcut_box()
 		theme.load_icons(self)
@@ -32,7 +35,14 @@ class TestApp(gtk.Application):
 		self.connect_actions_shortcut_box()
 
 		self.add_window(self.main_window)
-		self.main_window.show_all()
+		self.main_window.show()
+		
+		print("WINDOW START SIZE:", self.main_window.get_size())
+		self.app_size = self.main_window.get_size()
+		self.app_width = self.app_size[0]
+		self.app_height = self.app_size[1]
+		
+		self.main_window.connect("check-resize", self.main_window.on_resize_event)
 	
 	
 	def do_startup(self):
@@ -43,20 +53,16 @@ class TestApp(gtk.Application):
 			self.night_mode_state = config.night_mode_state
 			print("Night mode:", self.night_mode_state)
 			gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", self.night_mode_state)
-
+		
+		self.drop_down_state = config.drop_down_state
 
 		for action_name in config.shortcut_dict:
 			shortcut = config.shortcut_dict[action_name]
-#			print("SHORTCUT:", shortcut)
-#			print("ACTION:", action_name)
 			self.set_accels_for_action(action_name, shortcut)
 #			print("ACCELS for :", action_name, self.get_accels_for_action(action_name))
 
 
 	def create_main_window(self):
-#		self.builder_main_window = gtk.Builder()
-#		self.builder_main_window.add_from_file(config.file_ui_main_window)	
-#		self.main_window = self.builder_main_window.get_object("main_window")
 		self.create_header_bar()
 		self.main_window = test_main_window.MainWindow(self, theme)
 		self.main_window.set_titlebar(self.header_bar)
@@ -134,6 +140,7 @@ class TestApp(gtk.Application):
 		
 		self.button_new_term = self.builder_shortcut_box.get_object("button_new_term")
 		self.button_close_term = self.builder_shortcut_box.get_object("button_close_term")
+		self.button_drop_down = self.builder_shortcut_box.get_object("button_drop_down")
 		
 		if config.tab_box_pack_start:
 			self.main_window.main_box.tool_box.pack_end(self.event_shortcut_box, False, True, 0)
@@ -142,10 +149,10 @@ class TestApp(gtk.Application):
 		
 		
 	def connect_actions_header_bar(self):
-		self.window_state = gio.SimpleAction.new_stateful("save_window_state",
+		self.action_window_state = gio.SimpleAction.new_stateful("save_window_state",
 									 		None, glib.Variant.new_boolean(False))
-		self.window_state.connect("change-state", self.save_window_state)
-		self.add_action(self.window_state)
+		self.action_window_state.connect("change-state", self.save_window_state)
+		self.add_action(self.action_window_state)
 		
 		self.exit_app = gio.SimpleAction.new_stateful("exit_application",
 									 		None, glib.Variant.new_boolean(False))
@@ -193,6 +200,11 @@ class TestApp(gtk.Application):
 		self.action_close_term.connect("change-state", self.close_term)
 		self.add_action(self.action_close_term)
 		
+		self.action_drop_down = gio.SimpleAction.new_stateful("drop_down",
+									 None, glib.Variant.new_boolean(False))
+		self.action_drop_down.connect("change-state", self.drop_down)
+		self.add_action(self.action_drop_down)
+		
 	
 	def connect_actions_accelerators(self):
 		self.action_next_term = gio.SimpleAction.new_stateful("next_term",
@@ -214,8 +226,8 @@ class TestApp(gtk.Application):
 									 None, glib.Variant.new_boolean(False))
 		self.action_paste_clipboard.connect("change-state", self.paste_clipboard)
 		self.add_action(self.action_paste_clipboard)
-	
 
+	
 	
 	def scroll_test(self, action, state):
 		print("Scrolling")
@@ -248,33 +260,82 @@ class TestApp(gtk.Application):
 		self.main_window.main_box.move_prev_term()
 		
 		
+	def drop_down(self, action, state):
+		print("Toggling drop-down mode")
+		print("drop_down_state:", self.is_drop_down)
+
+		self.is_drop_down = not self.is_drop_down
+		state = glib.Variant.new_boolean(self.is_drop_down)
+		self.action_drop_down.set_state(state)
+		
+		new_line = str(self.is_drop_down)
+		self.replace_line(config.file_config, "is_drop_down", new_line)
+		
+		self.screen = self.main_window.get_screen()
+		self.screen_width = self.screen.get_width()
+		self.screen_height = self.screen.get_height()
+		
+		if self.is_drop_down:
+			print("DROPPING DOWN")
+			print("WINDOW DROP SIZE:", self.main_window.get_size())
+			self.app_width = self.screen_width + config.free_width_pixel
+#			self.app_height = self.screen_height / 2
+			
+			self.main_window.move(0, 0)
+			self.main_window.resize(self.app_width, self.app_height)
+			self.main_window.show_all()
+			self.header_bar.hide()
+#			self.save_window_state(None, None)
+		else:
+			print("RESTORING DROP DOWN")
+			self.header_bar.show()
+			self.restore_window_state(True)
+			
+			
+		
 	def restore_window_state(self, restore_state):
 		if restore_state:
 			print("Restoring window state")
 			print("Current position:", self.main_window.get_position())
 			print("Current size:", self.main_window.get_size())
-			data = config.window_state
+			
+			if self.is_drop_down:
+				print("IS DROP DOWN")
+				self.header_bar.hide()
+				data = config.drop_down_state
+			else:
+				print("IS NOT DROP DOWN")
+				data = config.window_state			
+
 			self.window_position = data[0]
 			self.window_size = data[1]
 			print("position:", data[0])
 			print("size:", data[1])
 			self.main_window.move(self.window_position[0], self.window_position[1])
-			self.main_window.set_default_size(self.window_size[0], self.window_size[1])
+			self.main_window.resize(self.window_size[0], self.window_size[1])
+				
 		else:
-			self.main_window.set_default_size(config.window_default_width, config.window_default_height)
-	
-	
-	def exit_application(self, action, state):
-		self.quit()
+			self.main_window.resize(config.window_default_width, config.window_default_height)
 	
 	
 	def save_window_state(self, action, state):
-		print("Saving window state")
-		self.main_window.window_state = []
-		self.main_window.window_state.append(self.main_window.get_position())
-		self.main_window.window_state.append(self.main_window.get_size())
-		new_line = str(self.main_window.window_state)
-		self.replace_line(config.file_config, "window_state", new_line)
+		self.window_state = []
+		if self.is_drop_down:	
+			self.window_state.append([0, 0])
+			self.window_state.append([self.app_width, self.app_height])
+			new_line = str(self.window_state)
+			self.replace_line(config.file_config, "drop_down_state", new_line)
+		else:
+			print("Saving window state")
+			self.window_state.append(self.main_window.get_position())
+			self.window_state.append(self.main_window.get_size())
+			new_line = str(self.window_state)
+			self.replace_line(config.file_config, "window_state", new_line)
+	
+
+
+	def exit_application(self, action, state):
+		self.quit()
 
 
 	def change_current_theme(self, action, state, theme_name):
@@ -363,9 +424,10 @@ class TestApp(gtk.Application):
 		with open(file_name, "w") as f:
 			for line in data:
 				if self.is_in_line(line, value_name):
-					print("Found config:", line, end="")
 					new_line = value_name + config.delimiter + new_value
-					print("Replaced by:", new_line)
+					if not self.is_drop_down:
+						print("Found config:", line, end="")
+						print("Replaced by:", new_line)
 					print(new_line, file=f, end="\n")
 				else:
 					print(line, file=f, end="")

@@ -18,7 +18,6 @@ class TestTermBox(gtk.Box):
 		self.scroll_window_term.set_name("scroll_window_term")
 		self.scroll_window_term.set_shadow_type(gtk.ShadowType.NONE)
 		self.scroll_window_term.set_overlay_scrolling(False)
-		print("OVERLAY:", self.scroll_window_term.get_overlay_scrolling())
 
 		self.create_scroll_box_term()
 		self.pack_end(self.scroll_box_term, False, False, 0)

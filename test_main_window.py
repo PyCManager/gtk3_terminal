@@ -15,6 +15,7 @@ class MainWindow(gtk.ApplicationWindow):
 		self.connect("focus-in-event", self.on_focus_in_event)
 		self.connect("focus-out-event", self.on_focus_out_event)
 
+
 		self.is_present = True
 		self.have_focus = True
 		self.is_fullscreen = False
@@ -47,7 +48,15 @@ class MainWindow(gtk.ApplicationWindow):
 			gdk.Screen.get_default(), self.style_provider,     
 			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
-		
+	
+	def on_resize_event(self, window):
+#		print("Resizing window")
+#		print("Window size:", self.get_size())
+		if self.parent.is_drop_down:
+			self.parent.app_width = self.get_size()[0]
+			self.parent.app_height = self.get_size()[1]
+			self.parent.save_window_state(None, None)
+	
 
 	def on_focus_in_event(self, window, event):
 #		print("Window is focused")

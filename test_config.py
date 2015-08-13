@@ -4,11 +4,11 @@ import test_theme
 
 rename_application = True
 title_application = "Nameless terminal"
-subtitle_application = "Version 0.96"
+subtitle_application = "Version 0.97"
 path_in_subtitle = True
 default_shell 	= "/usr/bin/zsh"
 theme_list = [ "default", "solarized_dark", "solarized_light", "debug" ]
-default_theme = theme_list[3]
+default_theme = theme_list[1]
 restore_night_mode = True
 night_mode_state = False
 
@@ -27,9 +27,13 @@ delimiter = " = "
 
 window_default_width = 1000
 window_default_height = 500
-window_state = [(498, 313), (998, 436)]
+window_state = [(342, 413), (1196, 448)]
 window_opacity = 0.90
 window_restore_state = True
+is_drop_down = True
+drop_down_state = [[0, 0], [1634, 482]]
+#There is a bug. My screen is detected as 1600x900 (as it should be). But I have in fact 1634px in width...
+free_width_pixel = 34
 #window_opacity 	= 1
 main_menu_opacity = 0.90
 main_menu_halign = gtk.Align.CENTER
@@ -54,7 +58,7 @@ sensibility_scroll = 4
 #					"<Alt>Left" : "app.prev_term", "<Alt>Right" : "app.next_term",
 #					"F11" : "app.toggle_fullscreen"}
 					
-shortcut_dict = {	"app.new_term" : ["<Alt>Up", "<Ctrl>T"],
+shortcut_dict = {	"app.new_term" : ["<Alt>Up", "<Ctrl>T"], "app.drop_down" : ["<Alt>Down"],
 					"app.prev_term" : ["<Alt>Left"], "app.next_term" : ["<Alt>Right"],
 					 "app.fullscreen" : ["F11"],
 					 "app.copy_clipboard" : ["<Ctrl><Shift>C"], "app.paste_clipboard" : ["<Ctrl><Shift>V"]}

@@ -13,7 +13,8 @@ icon_dict = { 	"new_term" 		: "tab-new-symbolic",
 				"preferences" 	: "system-run-symbolic",
 				"night_mode" 	: "object-inverse",
 				"go_home" 		: "go-home-symbolic",
-				"exit_app" 		: "window-close-symbolic"}
+				"exit_app" 		: "window-close-symbolic",
+				"drop_down" 	: "go-top-symbolic"}
 
 
 
@@ -86,10 +87,14 @@ class TestTheme(object):
 			self.terminal_bg = c_base3
 			self.terminal_fg = c_base00
 			self.terminal_cursor = c_cyan
-
+			
+			for icon_name in icon_dict:
+				icon_dict[icon_name] = path_theme + icon_name
+			
 			self.relief_button_shortcut_box = gtk.ReliefStyle.NONE
 			self.relief_button_tab_box = gtk.ReliefStyle.NONE
-
+			self.relief_button_main_menu = gtk.ReliefStyle.NONE
+			
 
 		self.palette = [self.c_1, self.c_2, self.c_3, self.c_4, self.c_5, self.c_6, self.c_7, self.c_8, 
 						self.c_1, self.c_2, self.c_3, self.c_4, self.c_5, self.c_6, self.c_7, self.c_8]
@@ -132,6 +137,11 @@ class TestTheme(object):
 		app.button_close_term.get_child().destroy()
 		app.button_close_term.add(image)
 		app.button_close_term.show_all()
+		
+		image = self.get_image("drop_down")
+		app.button_drop_down.get_child().destroy()
+		app.button_drop_down.add(image)
+		app.button_drop_down.show_all()
 	
 		
 	def hex_to_RGBA(self, hex_color):
@@ -143,7 +153,7 @@ class TestTheme(object):
 	
 	def get_image(self, image_name):
 		image_path = path_to_icons + icon_dict[image_name] + ".svg"
-		print("IMG PATH:", image_path)
+#		print("IMG PATH:", image_path)
 		if os.path.isfile(image_path):
 			try:
 				image = gtk.Image.new_from_file(image_path)

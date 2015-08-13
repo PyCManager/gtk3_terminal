@@ -39,6 +39,20 @@
 					</packing>
 				</child>
 				
+				<child>
+					<object class="GtkButton" id="button_drop_down">
+						<property name="action-name">app.drop_down</property>
+						<property name="visible">True</property>
+						<property name="can_focus">False</property>
+<!--						<property name="label" translatable="yes">New Term</property>-->
+						<property name="image">image_drop_down</property>
+						<property name="tooltip_text" translatable="yes">Toggle drop-down mode</property>
+					</object>
+					<packing>
+						<property name="position">2</property>
+					</packing>
+				</child>
+				
 			</object>
 		</child>
 		
@@ -50,6 +64,11 @@
 	</object>
 	
 	<object class="GtkImage" id="image_close_term">
+		<property name="visible">True</property>
+		<property name="icon_name">edit-delete-symbolic</property>
+	</object>
+	
+	<object class="GtkImage" id="image_drop_down">
 		<property name="visible">True</property>
 		<property name="icon_name">edit-delete-symbolic</property>
 	</object>
