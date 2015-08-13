@@ -174,7 +174,7 @@ class TestApp(gtk.Application):
 			else:
 				action_state = False
 			action_name = "theme_" + theme_name
-			print("Theme:", theme_name)
+#			print("Theme:", theme_name)
 			action_theme = gio.SimpleAction.new_stateful(action_name, 
 						None, glib.Variant.new_boolean(action_state))
 			action_theme.connect("change-state", self.change_current_theme, theme_name)
@@ -295,9 +295,7 @@ class TestApp(gtk.Application):
 		self.main_window.main_box.theme = theme
 		self.main_window.main_box.term_box.theme = theme
 		self.main_window.main_box.tool_box.theme = theme
-#		self.main_window.main_box.tool_box.tab_box.theme = theme
-#		self.main_window.main_box.tool_box.shortcut_box.theme = theme
-				
+	
 		self.active_term = self.main_window.main_box.active_term
 		self.active_term.set_colors(theme.terminal_fg, theme.terminal_bg, theme.palette)
 		self.active_term.set_color_cursor(theme.terminal_cursor)

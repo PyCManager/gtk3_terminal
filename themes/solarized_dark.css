@@ -53,11 +53,11 @@
 	text-shadow: none;
 }
 
+
 #button_save_state GtkLabel{
 	color: @label_button_save_state;
 	text-shadow: none;
 }
-
 
 GtkPopoverMenu{
 	background-image: none;
@@ -89,18 +89,12 @@ GtkPopoverMenu GtkLabel{
 	text-shadow: none;
 }
 
-
 #popover_theme_submenu GtkModelButton{
 	background-image: none;
 	background-color: @bg_button_menu;
 	border-color: @border_model_button_menu;
 }
 
-#popover_theme_submenu GtkCheckButton{
-	background-image: none;
-	background-color: #F00;
-	border-color: #FF0;
-}
 
 #popover_theme_submenu GtkModelButton:hover{
 	background-image: none;
@@ -117,13 +111,13 @@ GtkPopoverMenu GtkLabel{
 	text-shadow: none;
 }
 
-#term_box{
-	box-shadow: none;
+
+#term_box GtkScrollbar{
+	background-image: none;
+	background-color: @bg_scrollbar;
+	border-color: @scrollbar;
 }
 
-#main_menu GtkLabel{
-	color: @label_menu;
-}
 
 #tool_box{
 	border-width: 6px 0px 0px 0px;
@@ -140,48 +134,12 @@ GtkPopoverMenu GtkLabel{
 	box-shadow: none;
 }
 
-#event_tab_box{
-	background-color: @bg_box;
-	border-width: 6px 0px 0px 0px;
-	border-style: solid;
-	border-color: @border_box;
-}
 
 #event_shortcut_box{
 	background-color: @bg_box;
 	border-width: 6px 0px 0px 0px;
 	border-style: solid;
 	border-color: @border_box;
-}
-
-#scroll_window_tab{
-	background-color: @bg_box;
-/*	border-width: 6px;*/
-	border-style: solid;
-	border-color: @border_box;
-}
-
-#scroll_window_term{
-	background-color: @bg_box;
-	border-width: 6px;
-	border-style: solid;
-	border-color: @border_box;
-	box-shadow: none;
-}
-
-/*#scroll_window_term GtkScrollbar{*/
-/*	background-image: none;*/
-/*	background-color: #0F0;*/
-/*	color: #F00;*/
-/*	border-color: #F00;*/
-/*}*/
-
-#scroll_window_term GtkScrollbar{
-/*	border-width: 2px;*/
-/*	slider-color: 3px*/
-	background-image: none;
-	background-color: @bg_scrollbar;
-	border-color: @scrollbar;
 }
 
 #shortcut_box{
@@ -200,6 +158,20 @@ GtkPopoverMenu GtkLabel{
 	box-shadow: none;
 }
 
+
+#event_tab_box{
+	background-color: @bg_box;
+	border-width: 6px 0px 0px 0px;
+	border-style: solid;
+	border-color: @border_box;
+}
+
+#scroll_window_tab{
+	background-color: @bg_box;
+	border-style: solid;
+	border-color: @border_box;
+}
+
 #tab_box GtkButton{
 	border-color: @bg_button_tool_box;
 	border-width: 4px;
@@ -207,8 +179,6 @@ GtkPopoverMenu GtkLabel{
 	border-style: solid;
 	padding: 4px 8px;
 	box-shadow: none;
-
-
 }
 
 

@@ -4,7 +4,7 @@ import test_theme
 
 rename_application = True
 title_application = "Nameless terminal"
-subtitle_application = "Version 0.95"
+subtitle_application = "Version 0.96"
 path_in_subtitle = True
 default_shell 	= "/usr/bin/zsh"
 theme_list = [ "default", "solarized_dark", "solarized_light", "debug" ]

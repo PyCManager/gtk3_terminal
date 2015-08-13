@@ -71,8 +71,20 @@ class TestMainBox(gtk.Box):
 			self.create_term_box()
 				
 			print("New active terminal:", self.nb_active_term)			
-			self.term_box.scroll_window_term.add(self.active_term)
+
+			self.term_box.add(self.active_term)
 			self.active_term.show_now()
+			
+			self.scroll_bar_term_vadj = self.active_term.get_vadjustment()
+			self.scroll_bar_term = gtk.Scrollbar(orientation=gtk.Orientation.VERTICAL, adjustment=self.scroll_bar_term_vadj)
+			self.scroll_bar_term.set_name("scroll_bar_term")
+			
+			self.scroll_box_term = gtk.Box()
+			self.scroll_box_term.add(self.scroll_bar_term)
+			self.scroll_box_term.set_name("scroll_box_term")
+			
+			self.term_box.scroll_box_term.destroy()
+			self.term_box.pack_end(self.scroll_box_term, False, False, 0)
 			
 			
 		self.active_term.grab_focus()
@@ -88,9 +100,9 @@ class TestMainBox(gtk.Box):
 		self.active_term.set_colors(self.theme.terminal_fg, self.theme.terminal_bg, self.theme.palette)
 		self.active_term.set_color_cursor(self.theme.terminal_cursor)
 		self.active_term.set_cursor_shape(self.theme.terminal_cursor_shape)
+		
 		self.show_all()
-		print("SCROLL_TERM_CHILD:", self.term_box.scroll_window_term.get_children())
-#		print("SCROLL_TERM_SHADOW:", self.term_box.scroll_window_term.get_shadow_type())
+
 	
 	def set_tab_label(self):
 #		Doesn't work, apparently a bug in vte

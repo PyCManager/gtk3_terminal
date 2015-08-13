@@ -101,6 +101,8 @@ class TestTheme(object):
 		
 	
 	def load_icons(self, app):
+#		TODO: Do this in loop.
+	
 		image = self.get_image("fullscreen")
 		app.button_fullscreen.get_child().destroy()
 		app.button_fullscreen.add(image)

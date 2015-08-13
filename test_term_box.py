@@ -16,10 +16,16 @@ class TestTermBox(gtk.Box):
 		self.theme = theme
 		self.scroll_window_term = gtk.ScrolledWindow()
 		self.scroll_window_term.set_name("scroll_window_term")
-#		self.scroll_window_term.set_shadow_type(gtk.ShadowType.NONE)
+		self.scroll_window_term.set_shadow_type(gtk.ShadowType.NONE)
+		self.scroll_window_term.set_overlay_scrolling(False)
+		print("OVERLAY:", self.scroll_window_term.get_overlay_scrolling())
 
-		self.add(self.scroll_window_term)
+		self.create_scroll_box_term()
+		self.pack_end(self.scroll_box_term, False, False, 0)
 		self.show_all()
+		
+	def create_scroll_box_term(self):
+		self.scroll_box_term = gtk.Box()
 		
 		
 	def create_term(self, terminal_list, path_open_terminal):
@@ -32,7 +38,7 @@ class TestTermBox(gtk.Box):
 			command = config.launch_command_new_term
 			length_command = len(command)
 			self.term.feed_child(command, length_command)
-			
+#		print("DIR_TERMINAL:", dir(self.term))
 		self.term.grab_focus()
 		terminal_list.append(self.term)
 		
