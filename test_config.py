@@ -4,7 +4,7 @@ import test_theme
 
 rename_application = True
 title_application = "Nameless terminal"
-subtitle_application = "Version 0.97"
+subtitle_application = "Version 0.98"
 path_in_subtitle = True
 default_shell 	= "/usr/bin/zsh"
 theme_list = [ "default", "solarized_dark", "solarized_light", "debug" ]
@@ -27,11 +27,14 @@ delimiter = " = "
 
 window_default_width = 1000
 window_default_height = 500
-window_state = [(342, 413), (1196, 448)]
 window_opacity = 0.90
 window_restore_state = True
-is_drop_down = True
-drop_down_state = [[0, 0], [1634, 482]]
+window_state = [(537, 388), (877, 421)]
+is_drop_down = False
+drop_down_state = [(-17, 13), (1634, 534)]
+drop_down_default_position = [-42, -42]
+drop_down_default_size = [9999, 421]
+count_resize_event_max = 3
 #There is a bug. My screen is detected as 1600x900 (as it should be). But I have in fact 1634px in width...
 free_width_pixel = 34
 #window_opacity 	= 1

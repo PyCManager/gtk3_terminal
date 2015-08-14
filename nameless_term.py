@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from gi.repository import Gtk as gtk, Gio as gio, GLib as glib, Notify
+from gi.repository import Gtk as gtk, Gio as gio, GLib as glib, Notify, AppIndicator3
 import test_theme, test_config as config, test_main_window
 import signal
 import sys
@@ -16,15 +16,37 @@ class TestApp(gtk.Application):
 								application_id="org.keiwop.nameless_term",
 								flags=gio.ApplicationFlags.FLAGS_NONE)
 
+
+	def do_startup(self):
+		gtk.Application.do_startup(self)
+		signal.signal(signal.SIGINT, signal.SIG_DFL)
+		
+		print("Hello, this is the Nameless Terminal")
+
+		if config.restore_night_mode:
+			self.night_mode_state = config.night_mode_state
+			print("Night mode:", self.night_mode_state)
+			gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", self.night_mode_state)
+
+		for action_name in config.shortcut_dict:
+			shortcut = config.shortcut_dict[action_name]
+			self.set_accels_for_action(action_name, shortcut)
+#			print("ACCELS for :", action_name, self.get_accels_for_action(action_name))	
+
+		self.is_drop_down = config.is_drop_down
+#		self.drop_down_state = config.drop_down_state
+		self.count_resize_event = 0
+#		self.drop_down_position = config.drop_down_default_position
+#		self.drop_down_size = config.drop_down_state[1]
+	
 		
 	def do_activate(self):
 
 		self.create_main_window()
-	
-		self.is_drop_down = config.is_drop_down
+		self.create_app_menu()
+		self.create_app_indicator()
 		self.restore_window_state(config.window_restore_state)	
 		
-		self.create_app_menu()
 		self.create_shortcut_box()
 		theme.load_icons(self)
 		
@@ -37,30 +59,38 @@ class TestApp(gtk.Application):
 		self.add_window(self.main_window)
 		self.main_window.show()
 		
-		print("WINDOW START SIZE:", self.main_window.get_size())
-		self.app_size = self.main_window.get_size()
-		self.app_width = self.app_size[0]
-		self.app_height = self.app_size[1]
+#		I've got garbage in the first terminal, so I close it. 
+#		I know it's ugly, but I might spend some time on it later
+		self.close_term(None, None)
+#		self.main_window.main_box.active_term.feed_child(command, len(command))
+#		print("WINDOW START SIZE:", self.main_window.get_size())
+#		self.app_size = self.main_window.get_size()
+#		self.app_width = self.app_size[0]
+#		self.app_height = self.app_size[1]
+		self.main_window.connect("check-resize", self.on_resize_event)
+
+
+	
+	def create_app_indicator(self):
+		self.indicator = AppIndicator3.Indicator.new(
+			"TestNAME",
+			"test",
+			AppIndicator3.IndicatorCategory.APPLICATION_STATUS)
+		self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 		
-		self.main_window.connect("check-resize", self.main_window.on_resize_event)
+		self.menu_indicator = gtk.Menu()
+		
+		self.item_fullscreen = gtk.MenuItem("Fullscreen")
+		self.item_fullscreen.connect("activate", self.toggle_fullscreen, None)
+		self.item_preferences = gtk.MenuItem("Preferences")
+		
+		self.menu_indicator.append(self.item_fullscreen)
+		self.menu_indicator.append(self.item_preferences)
+		self.menu_indicator.show_all()
+		
+		self.indicator.set_menu(self.menu_indicator)
 	
 	
-	def do_startup(self):
-		gtk.Application.do_startup(self)
-		signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-		if config.restore_night_mode:
-			self.night_mode_state = config.night_mode_state
-			print("Night mode:", self.night_mode_state)
-			gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", self.night_mode_state)
-		
-		self.drop_down_state = config.drop_down_state
-
-		for action_name in config.shortcut_dict:
-			shortcut = config.shortcut_dict[action_name]
-			self.set_accels_for_action(action_name, shortcut)
-#			print("ACCELS for :", action_name, self.get_accels_for_action(action_name))
-
 
 	def create_main_window(self):
 		self.create_header_bar()
@@ -261,78 +291,92 @@ class TestApp(gtk.Application):
 		
 		
 	def drop_down(self, action, state):
-		print("Toggling drop-down mode")
-		print("drop_down_state:", self.is_drop_down)
+		print("\nToggling drop-down mode")
 
 		self.is_drop_down = not self.is_drop_down
+		print("drop_down_state:", self.is_drop_down)
+
 		state = glib.Variant.new_boolean(self.is_drop_down)
 		self.action_drop_down.set_state(state)
 		
 		new_line = str(self.is_drop_down)
 		self.replace_line(config.file_config, "is_drop_down", new_line)
 		
-		self.screen = self.main_window.get_screen()
-		self.screen_width = self.screen.get_width()
-		self.screen_height = self.screen.get_height()
+#		self.screen = self.main_window.get_screen()
+#		self.screen_width = self.screen.get_width()
+#		self.screen_height = self.screen.get_height()
 		
 		if self.is_drop_down:
-			print("DROPPING DOWN")
-			print("WINDOW DROP SIZE:", self.main_window.get_size())
-			self.app_width = self.screen_width + config.free_width_pixel
-#			self.app_height = self.screen_height / 2
-			
-			self.main_window.move(0, 0)
-			self.main_window.resize(self.app_width, self.app_height)
-			self.main_window.show_all()
+			print("\nGoing into drop-down mode")
+			self.main_window.resize(config.drop_down_default_size[0], config.drop_down_default_size[1])
+			self.main_window.move(config.drop_down_default_position[0], config.drop_down_default_position[1])
+			self.main_window.show()
 			self.header_bar.hide()
-#			self.save_window_state(None, None)
 		else:
-			print("RESTORING DROP DOWN")
+			print("Quitting drop-down mode")
 			self.header_bar.show()
 			self.restore_window_state(True)
 			
-			
+	
+	def on_resize_event(self, window):
+		if self.is_drop_down:
+			print("\nResize window event")
+			self.count_resize_event += 1
+#			print("Window position:", self.main_window.get_position())
+#			print("Window size:", self.main_window.get_size())
+			if self.count_resize_event >= config.count_resize_event_max:
+				print("Resize event is chosen")
+				self.save_drop_down_height(self.main_window.get_size()[1])
+				self.count_resize_event = 0
+	
+	
+	def save_drop_down_height(self, height):
+		self.drop_down_size = config.drop_down_default_size
+		self.drop_down_size[1] = height
+		new_line = str(self.drop_down_size)
+		self.replace_line(config.file_config, "drop_down_default_size", new_line)
+	
 		
 	def restore_window_state(self, restore_state):
 		if restore_state:
-			print("Restoring window state")
-			print("Current position:", self.main_window.get_position())
-			print("Current size:", self.main_window.get_size())
+#			print("Restoring window state")
+#			print("Current position:", self.main_window.get_position())
+#			print("Current size:", self.main_window.get_size())
 			
 			if self.is_drop_down:
-				print("IS DROP DOWN")
+				print("\nRestoring to drop-down mode")
+				print("Window drop-mode size:", config.drop_down_default_size)
 				self.header_bar.hide()
-				data = config.drop_down_state
+				data = []
+				data.append(config.drop_down_default_position)
+				data.append(config.drop_down_default_size)
 			else:
-				print("IS NOT DROP DOWN")
-				data = config.window_state			
+				print("\nRestoring normal mode")
+				print("Window size:", config.window_state)
+				data = config.window_state	
 
 			self.window_position = data[0]
 			self.window_size = data[1]
-			print("position:", data[0])
-			print("size:", data[1])
-			self.main_window.move(self.window_position[0], self.window_position[1])
+			
 			self.main_window.resize(self.window_size[0], self.window_size[1])
-				
+			self.main_window.move(self.window_position[0], self.window_position[1])
+			self.main_window.show()
+			
+#			print("\nRestoration is done")
+#			print("position:", self.main_window.get_position())
+#			print("size:", self.main_window.get_size())
 		else:
 			self.main_window.resize(config.window_default_width, config.window_default_height)
 	
 	
 	def save_window_state(self, action, state):
 		self.window_state = []
-		if self.is_drop_down:	
-			self.window_state.append([0, 0])
-			self.window_state.append([self.app_width, self.app_height])
-			new_line = str(self.window_state)
-			self.replace_line(config.file_config, "drop_down_state", new_line)
-		else:
-			print("Saving window state")
-			self.window_state.append(self.main_window.get_position())
-			self.window_state.append(self.main_window.get_size())
-			new_line = str(self.window_state)
-			self.replace_line(config.file_config, "window_state", new_line)
+		print("Saving window state")
+		self.window_state.append(self.main_window.get_position())
+		self.window_state.append(self.main_window.get_size())
+		new_line = str(self.window_state)
+		self.replace_line(config.file_config, "window_state", new_line)
 	
-
 
 	def exit_application(self, action, state):
 		self.quit()
@@ -370,8 +414,9 @@ class TestApp(gtk.Application):
 
 	def toggle_fullscreen(self, action, state):
 		print("toggling fullscreen mode")
-		state = glib.Variant.new_boolean(self.main_window.is_fullscreen)
-		self.action_fullscreen.set_state(state)
+		if state is not None:
+			state = glib.Variant.new_boolean(self.main_window.is_fullscreen)
+			self.action_fullscreen.set_state(state)
 		
 		if self.main_window.is_fullscreen:
 			self.main_window.unfullscreen()

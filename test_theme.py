@@ -88,6 +88,8 @@ class TestTheme(object):
 			self.terminal_fg = c_base00
 			self.terminal_cursor = c_cyan
 			
+			path_theme = theme_name + "/"
+			
 			for icon_name in icon_dict:
 				icon_dict[icon_name] = path_theme + icon_name
 			

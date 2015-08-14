@@ -21,7 +21,7 @@
 						<property name="tooltip_text" translatable="yes">Open a new terminal</property>
 					</object>
 					<packing>
-						<property name="position">1</property>
+						<property name="position">0</property>
 					</packing>
 				</child>
 				
@@ -35,7 +35,7 @@
 						<property name="tooltip_text" translatable="yes">Close current terminal</property>
 					</object>
 					<packing>
-						<property name="position">0</property>
+						<property name="position">1</property>
 					</packing>
 				</child>
 				

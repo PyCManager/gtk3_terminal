@@ -1,4 +1,4 @@
-from gi.repository import Gtk as gtk, Gdk as gdk, GLib as glib, Keybinder, Notify
+from gi.repository import Gtk as gtk, Gdk as gdk, GLib as glib, Keybinder, Wnck
 import test_config as config, test_main_box
 
 
@@ -15,6 +15,10 @@ class MainWindow(gtk.ApplicationWindow):
 		self.connect("focus-in-event", self.on_focus_in_event)
 		self.connect("focus-out-event", self.on_focus_out_event)
 
+		self.wnck = Wnck.Screen.get_default()
+		self.wnck.force_update()
+		self.active_workspace = self.wnck.get_active_workspace()
+		self.last_active_workspace = self.wnck.get_active_workspace()
 
 		self.is_present = True
 		self.have_focus = True
@@ -49,14 +53,6 @@ class MainWindow(gtk.ApplicationWindow):
 			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
 	
-	def on_resize_event(self, window):
-#		print("Resizing window")
-#		print("Window size:", self.get_size())
-		if self.parent.is_drop_down:
-			self.parent.app_width = self.get_size()[0]
-			self.parent.app_height = self.get_size()[1]
-			self.parent.save_window_state(None, None)
-	
 
 	def on_focus_in_event(self, window, event):
 #		print("Window is focused")
@@ -77,15 +73,33 @@ class MainWindow(gtk.ApplicationWindow):
 	def hide_app(self, key_bind_hide, user_data):
 		self.last_event_time = Keybinder.get_current_event_time()
 		print ("Event time:", self.last_event_time)
-
+		
+		self.wnck.force_update()
+		self.active_workspace = self.wnck.get_active_workspace()
+		print("Workspaces:", self.wnck.get_workspaces())
+		print("Active workspace:", self.active_workspace)
+		print("Last active workspace:", self.last_active_workspace)
+		
 		if self.is_present:
 			print("Hiding app")
-			self.iconify()
+			if self.parent.is_drop_down:
+				self.hide()
+			else:
+				self.iconify()
 			self.is_present = False
 
 		else:
 			print("Showing app")
+			if self.parent.is_drop_down:
+				if self.last_active_workspace == self.active_workspace:				
+					self.present()
+				else:
+					self.last_active_workspace = self.active_workspace
+					self.hide()
+					self.present()
+		
 			self.present_with_time(self.last_event_time)
+			self.show()
 			self.main_box.active_term.grab_focus()
 			self.is_present = True
 
@@ -99,9 +113,9 @@ class MainWindow(gtk.ApplicationWindow):
 		FULLSCREEN	= gdk.WindowState.FULLSCREEN
 		HIDDEN 		= "HIDDEN"
 		DEICONIFIED	= "DEICONIFIED"
-#		print("MASK:", event.changed_mask)
-#		print("STATE:", event.new_window_state)
-#		print("Window size:", self.get_size())
+		print("\nMASK:", event.changed_mask)
+		print("STATE:", event.new_window_state)
+		print("Window size:", self.get_size())
 
 		self.count_changed_state += 1
 
@@ -134,5 +148,7 @@ class MainWindow(gtk.ApplicationWindow):
 			elif event.new_window_state & FOCUSED:
 				self.is_fullscreen = False
 				self.is_present = True
+		
+		print("IS_PRESENT:", self.is_present)
 				
 		return True
