@@ -76,10 +76,10 @@ class MainWindow(gtk.ApplicationWindow):
 		
 		self.wnck.force_update()
 		self.active_workspace = self.wnck.get_active_workspace()
-		print("Workspaces:", self.wnck.get_workspaces())
-		print("Active workspace:", self.active_workspace)
-		print("Last active workspace:", self.last_active_workspace)
-		
+#		print("Workspaces:", self.wnck.get_workspaces())
+#		print("Active workspace:", self.active_workspace)
+#		print("Last active workspace:", self.last_active_workspace)
+#		
 		if self.is_present:
 			print("Hiding app")
 			if self.parent.is_drop_down:
@@ -91,15 +91,15 @@ class MainWindow(gtk.ApplicationWindow):
 		else:
 			print("Showing app")
 			if self.parent.is_drop_down:
-				if self.last_active_workspace == self.active_workspace:				
-					self.present()
-				else:
+				if self.last_active_workspace != self.active_workspace:				
 					self.last_active_workspace = self.active_workspace
 					self.hide()
-					self.present()
+
+				self.show()
+#				self.present()
+#				self.set_icon_from_file(config.file_program_icon)
 		
 			self.present_with_time(self.last_event_time)
-			self.show()
 			self.main_box.active_term.grab_focus()
 			self.is_present = True
 
@@ -113,9 +113,9 @@ class MainWindow(gtk.ApplicationWindow):
 		FULLSCREEN	= gdk.WindowState.FULLSCREEN
 		HIDDEN 		= "HIDDEN"
 		DEICONIFIED	= "DEICONIFIED"
-		print("\nMASK:", event.changed_mask)
-		print("STATE:", event.new_window_state)
-		print("Window size:", self.get_size())
+#		print("\nMASK:", event.changed_mask)
+#		print("STATE:", event.new_window_state)
+#		print("Window size:", self.get_size())
 
 		self.count_changed_state += 1
 
@@ -149,6 +149,6 @@ class MainWindow(gtk.ApplicationWindow):
 				self.is_fullscreen = False
 				self.is_present = True
 		
-		print("IS_PRESENT:", self.is_present)
+#		print("IS_PRESENT:", self.is_present)
 				
 		return True

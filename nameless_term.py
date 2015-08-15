@@ -2,11 +2,13 @@
 
 from gi.repository import Gtk as gtk, Gio as gio, GLib as glib, Notify, AppIndicator3
 import test_theme, test_config as config, test_main_window
+import logging
 import signal
 import sys
 import re
 
 theme = test_theme.TestTheme(config.default_theme)
+logging.basicConfig(stream=sys.stderr, level=config.logging_level)
 
 
 class TestApp(gtk.Application):
@@ -21,17 +23,16 @@ class TestApp(gtk.Application):
 		gtk.Application.do_startup(self)
 		signal.signal(signal.SIGINT, signal.SIG_DFL)
 		
-		print("Hello, this is the Nameless Terminal")
-
+		logging.info("Hello, this is the Nameless Terminal")
+		
 		if config.restore_night_mode:
 			self.night_mode_state = config.night_mode_state
-			print("Night mode:", self.night_mode_state)
+			logging.info("Night mode: %s"% self.night_mode_state)
 			gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", self.night_mode_state)
 
 		for action_name in config.shortcut_dict:
 			shortcut = config.shortcut_dict[action_name]
 			self.set_accels_for_action(action_name, shortcut)
-#			print("ACCELS for :", action_name, self.get_accels_for_action(action_name))	
 
 		self.is_drop_down = config.is_drop_down
 #		self.drop_down_state = config.drop_down_state
@@ -43,6 +44,7 @@ class TestApp(gtk.Application):
 	def do_activate(self):
 
 		self.create_main_window()
+		self.main_window.set_icon_from_file(config.file_program_icon)
 		self.create_app_menu()
 		self.create_app_indicator()
 		self.restore_window_state(config.window_restore_state)	
@@ -63,10 +65,6 @@ class TestApp(gtk.Application):
 #		I know it's ugly, but I might spend some time on it later
 		self.close_term(None, None)
 #		self.main_window.main_box.active_term.feed_child(command, len(command))
-#		print("WINDOW START SIZE:", self.main_window.get_size())
-#		self.app_size = self.main_window.get_size()
-#		self.app_width = self.app_size[0]
-#		self.app_height = self.app_size[1]
 		self.main_window.connect("check-resize", self.on_resize_event)
 
 
@@ -77,7 +75,8 @@ class TestApp(gtk.Application):
 			"test",
 			AppIndicator3.IndicatorCategory.APPLICATION_STATUS)
 		self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-		
+		self.indicator.set_icon_theme_path(config.path_to_icons)
+		self.indicator.set_icon(config.file_program_icon)
 		self.menu_indicator = gtk.Menu()
 		
 		self.item_fullscreen = gtk.MenuItem("Fullscreen")
@@ -211,7 +210,7 @@ class TestApp(gtk.Application):
 			else:
 				action_state = False
 			action_name = "theme_" + theme_name
-#			print("Theme:", theme_name)
+#			logging.info("Theme: %s"% theme_name)
 			action_theme = gio.SimpleAction.new_stateful(action_name, 
 						None, glib.Variant.new_boolean(action_state))
 			action_theme.connect("change-state", self.change_current_theme, theme_name)
@@ -260,41 +259,41 @@ class TestApp(gtk.Application):
 	
 	
 	def scroll_test(self, action, state):
-		print("Scrolling")
+		logging.debug("Scrolling")
 		
 	def copy_clipboard(self, action, state):
-		print("Copying to clipboard")
+		logging.debug("Copying to clipboard")
 		self.active_term = self.main_window.main_box.active_term
 		self.active_term.copy_clipboard()
 	
 	def paste_clipboard(self, action, state):
-		print("Pasting the clipboard")
+		logging.debug("Pasting the clipboard")
 		self.active_term = self.main_window.main_box.active_term
 		self.active_term.paste_clipboard()
 	
 	def new_term(self, action, state):
-		print("Opening new terminal")
+		logging.info("Opening new terminal")
 		self.main_window.main_box.add_new_term(config.terminal_default_name)
 
 	def close_term(self, action, state):
-		print("Closing active terminal")
+		logging.info("Closing active terminal")
 		self.nb_active_term = self.main_window.main_box.nb_active_term
 		self.main_window.main_box.remove_term(self.nb_active_term, False)
 	
 	def next_term(self, action, state):
-		print("Going to next term")
+		logging.info("Going to next term")
 		self.main_window.main_box.move_next_term()
 		
 	def prev_term(self, action, state):
-		print("Going to prev term")	
+		logging.info("Going to prev term")	
 		self.main_window.main_box.move_prev_term()
 		
 		
 	def drop_down(self, action, state):
-		print("\nToggling drop-down mode")
+		logging.info("Toggling drop-down mode")
 
 		self.is_drop_down = not self.is_drop_down
-		print("drop_down_state:", self.is_drop_down)
+		logging.debug("drop_down_state: %s"% self.is_drop_down)
 
 		state = glib.Variant.new_boolean(self.is_drop_down)
 		self.action_drop_down.set_state(state)
@@ -307,25 +306,25 @@ class TestApp(gtk.Application):
 #		self.screen_height = self.screen.get_height()
 		
 		if self.is_drop_down:
-			print("\nGoing into drop-down mode")
+			logging.debug("Going into drop-down mode")
 			self.main_window.resize(config.drop_down_default_size[0], config.drop_down_default_size[1])
 			self.main_window.move(config.drop_down_default_position[0], config.drop_down_default_position[1])
 			self.main_window.show()
 			self.header_bar.hide()
 		else:
-			print("Quitting drop-down mode")
+			logging.debug("Quitting drop-down mode")
 			self.header_bar.show()
 			self.restore_window_state(True)
 			
 	
 	def on_resize_event(self, window):
 		if self.is_drop_down:
-			print("\nResize window event")
+			logging.debug("Resize window event")
 			self.count_resize_event += 1
-#			print("Window position:", self.main_window.get_position())
-#			print("Window size:", self.main_window.get_size())
+#			logging.debug("Window position: %s"% self.main_window.get_position())
+#			logging.debug("Window size: %s"% self.main_window.get_size())
 			if self.count_resize_event >= config.count_resize_event_max:
-				print("Resize event is chosen")
+				logging.debug("Resize event is chosen")
 				self.save_drop_down_height(self.main_window.get_size()[1])
 				self.count_resize_event = 0
 	
@@ -339,20 +338,20 @@ class TestApp(gtk.Application):
 		
 	def restore_window_state(self, restore_state):
 		if restore_state:
-#			print("Restoring window state")
-#			print("Current position:", self.main_window.get_position())
-#			print("Current size:", self.main_window.get_size())
+#			logging.debug("Restoring window state")
+#			logging.debug("Current position: %s"% self.main_window.get_position())
+#			logging.debug("Current size: %s"% self.main_window.get_size())
 			
 			if self.is_drop_down:
-				print("\nRestoring to drop-down mode")
-				print("Window drop-mode size:", config.drop_down_default_size)
+				logging.info("Restoring to drop-down mode")
+
 				self.header_bar.hide()
 				data = []
 				data.append(config.drop_down_default_position)
 				data.append(config.drop_down_default_size)
 			else:
-				print("\nRestoring normal mode")
-				print("Window size:", config.window_state)
+				logging.info("Restoring normal mode")
+				logging.debug("Window size: %s"% config.window_state)
 				data = config.window_state	
 
 			self.window_position = data[0]
@@ -362,16 +361,16 @@ class TestApp(gtk.Application):
 			self.main_window.move(self.window_position[0], self.window_position[1])
 			self.main_window.show()
 			
-#			print("\nRestoration is done")
-#			print("position:", self.main_window.get_position())
-#			print("size:", self.main_window.get_size())
+#			logging.debug("\nRestoration is done")
+#			logging.debug("position: %s"% self.main_window.get_position())
+#			logging.debug("size: %s"% self.main_window.get_size())
 		else:
 			self.main_window.resize(config.window_default_width, config.window_default_height)
 	
 	
 	def save_window_state(self, action, state):
 		self.window_state = []
-		print("Saving window state")
+		logging.info("Saving window state")
 		self.window_state.append(self.main_window.get_position())
 		self.window_state.append(self.main_window.get_size())
 		new_line = str(self.window_state)
@@ -384,10 +383,10 @@ class TestApp(gtk.Application):
 
 	def change_current_theme(self, action, state, theme_name):
 		global theme
-		print("Setting theme:", theme_name)
+		logging.info("Setting theme: %s"% theme_name)
 		
 		for action_theme in self.actions_theme:
-#			print("THEME:", action_theme)
+#			logging.debug("THEME: %s"% action_theme)
 			if action_theme == action:
 				state = glib.Variant.new_boolean(True)
 			else:
@@ -413,7 +412,7 @@ class TestApp(gtk.Application):
 
 
 	def toggle_fullscreen(self, action, state):
-		print("toggling fullscreen mode")
+		logging.info("toggling fullscreen mode")
 		if state is not None:
 			state = glib.Variant.new_boolean(self.main_window.is_fullscreen)
 			self.action_fullscreen.set_state(state)
@@ -441,7 +440,7 @@ class TestApp(gtk.Application):
 
 
 	def toggle_night_mode(self, action, state):
-		print("Toggling night mode")
+		logging.info("Toggling night mode")
 		self.night_mode_state = not self.night_mode_state
 		state = glib.Variant.new_boolean(self.night_mode_state)
 		self.action_night_mode.set_state(state)
@@ -452,14 +451,14 @@ class TestApp(gtk.Application):
 
 
 	def on_preferences_activated(self, widget, arg):
-		print("Opening the preferences")
+		logging.info("Opening the preferences")
 		
 		
 	def on_test_activated(self, widget, arg):
-		print("Test is a success !")
+		logging.debug("Test is a success !")
 		
 	def on_button_test_clicked(self, widget, arg):
-		print("Test is a success !")
+		logging.debug("Test is a success !")
 		
 		
 	def replace_line(self, file_name, value_name, new_value):
@@ -471,8 +470,8 @@ class TestApp(gtk.Application):
 				if self.is_in_line(line, value_name):
 					new_line = value_name + config.delimiter + new_value
 					if not self.is_drop_down:
-						print("Found config:", line, end="")
-						print("Replaced by:", new_line)
+						logging.debug("Found config: %s"% line)
+						logging.debug("Replaced by: %s"% new_line)
 					print(new_line, file=f, end="\n")
 				else:
 					print(line, file=f, end="")

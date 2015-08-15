@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=0.99
+Type=Application
+Encoding=UTF-8
+Name=Nameless Term
+Comment=GTK3 terminal which can be in windowed or drop-down mode
+Path=/_/src/python/nameless_term
+Exec=/_/src/python/nameless_term/nameless_term.py
+#Icon=nameless_term
+Icon=/_/src/python/nameless_term/icons/nameless_term_home.svg
+Categories=GNOME;GTK;System;Utility;TerminalEmulator;
+StartupNotify=true
+#NoDisplay=true
