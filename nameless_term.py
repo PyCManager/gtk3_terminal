@@ -1,13 +1,14 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 
-from gi.repository import Gtk as gtk, Gio as gio, GLib as glib, Notify, AppIndicator3
-import test_theme, test_config as config, test_main_window
+from gi.repository import Gtk as gtk, Gio as gio, GLib as glib, Notify
+#from gi.repository import AppIndicator3 
+import nameless_theme, nameless_config as config, nameless_main_window
 import logging
 import signal
 import sys
 import re
 
-theme = test_theme.TestTheme(config.default_theme)
+theme = nameless_theme.TestTheme(config.default_theme)
 logging.basicConfig(stream=sys.stderr, level=config.logging_level)
 
 
@@ -46,7 +47,7 @@ class TestApp(gtk.Application):
 		self.create_main_window()
 		self.main_window.set_icon_from_file(config.file_program_icon)
 		self.create_app_menu()
-		self.create_app_indicator()
+#		self.create_app_indicator()
 		self.restore_window_state(config.window_restore_state)	
 		
 		self.create_shortcut_box()
@@ -69,31 +70,31 @@ class TestApp(gtk.Application):
 
 
 	
-	def create_app_indicator(self):
-		self.indicator = AppIndicator3.Indicator.new(
-			"TestNAME",
-			"test",
-			AppIndicator3.IndicatorCategory.APPLICATION_STATUS)
-		self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-		self.indicator.set_icon_theme_path(config.path_to_icons)
-		self.indicator.set_icon(config.file_program_icon)
-		self.menu_indicator = gtk.Menu()
-		
-		self.item_fullscreen = gtk.MenuItem("Fullscreen")
-		self.item_fullscreen.connect("activate", self.toggle_fullscreen, None)
-		self.item_preferences = gtk.MenuItem("Preferences")
-		
-		self.menu_indicator.append(self.item_fullscreen)
-		self.menu_indicator.append(self.item_preferences)
-		self.menu_indicator.show_all()
-		
-		self.indicator.set_menu(self.menu_indicator)
+#	def create_app_indicator(self):
+#		self.indicator = AppIndicator3.Indicator.new(
+#			"TestNAME",
+#			"test",
+#			AppIndicator3.IndicatorCategory.APPLICATION_STATUS)
+#		self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+#		self.indicator.set_icon_theme_path(config.path_to_icons)
+#		self.indicator.set_icon(config.file_program_icon)
+#		self.menu_indicator = gtk.Menu()
+#		
+#		self.item_fullscreen = gtk.MenuItem("Fullscreen")
+#		self.item_fullscreen.connect("activate", self.toggle_fullscreen, None)
+#		self.item_preferences = gtk.MenuItem("Preferences")
+#		
+#		self.menu_indicator.append(self.item_fullscreen)
+#		self.menu_indicator.append(self.item_preferences)
+#		self.menu_indicator.show_all()
+#		
+#		self.indicator.set_menu(self.menu_indicator)
 	
 	
 
 	def create_main_window(self):
 		self.create_header_bar()
-		self.main_window = test_main_window.MainWindow(self, theme)
+		self.main_window = nameless_main_window.MainWindow(self, theme)
 		self.main_window.set_titlebar(self.header_bar)
 	
 	
