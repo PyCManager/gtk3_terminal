@@ -37,7 +37,7 @@ class TestTermBox(gtk.Box):
 			command = config.launch_command_new_term
 			length_command = len(command)
 			self.term.feed_child(command, length_command)
-#		print("DIR_TERMINAL:", dir(self.term))
+		#print("DIR_TERMINAL:", dir(self.term))
 		self.term.grab_focus()
 		terminal_list.append(self.term)
 		

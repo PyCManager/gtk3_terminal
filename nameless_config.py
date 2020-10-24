@@ -38,7 +38,7 @@ window_state = [(553, 206), (877, 421)]
 is_drop_down = True
 drop_down_state = [(-17, 13), (1634, 534)]
 drop_down_default_position = [-42, -42]
-drop_down_default_size = [9999, 496]
+drop_down_default_size = [9999, 993]
 count_resize_event_max = 3
 #There is a bug. My screen is detected as 1600x900 (as it should be). But I have in fact 1634px in width...
 free_width_pixel = 34
