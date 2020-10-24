@@ -1,4 +1,4 @@
-from gi.repository import Gtk as gtk, Vte as vte
+from gi.repository import Gtk, Vte
 from os.path import expanduser
 #import nameless_theme
 import logging
@@ -38,13 +38,13 @@ window_state = [(553, 206), (877, 421)]
 is_drop_down = True
 drop_down_state = [(-17, 13), (1634, 534)]
 drop_down_default_position = [-42, -42]
-drop_down_default_size = [9999, 752]
+drop_down_default_size = [9999, 496]
 count_resize_event_max = 3
 #There is a bug. My screen is detected as 1600x900 (as it should be). But I have in fact 1634px in width...
 free_width_pixel = 34
 #window_opacity 	= 1
 main_menu_opacity = 0.90
-main_menu_halign = gtk.Align.CENTER
+main_menu_halign = Gtk.Align.CENTER
 main_menu_show_icons = True
 override_menu_relief = False
 
@@ -79,7 +79,7 @@ terminal_deleted_activate_prev = True
 terminal_mouse_autohide = True
 terminal_bg_image = ""
 #Can be IBEAM or BLOCK
-terminal_cursor_shape = vte.CursorShape.UNDERLINE
+terminal_cursor_shape = Vte.CursorShape.UNDERLINE
 terminal_default_name = "Terminal"
 
 #Cleaning is a hack to hide a white 1px bar around tool_box when using a dark theme

@@ -76,7 +76,6 @@ class TestApp(Gtk.Application):
 		self.main_window.connect("check-resize", self.on_resize_event)
 
 
-
 #	def create_app_indicator(self):
 #		self.indicator = AppIndicator3.Indicator.new(
 #			"TestNAME",
@@ -96,7 +95,6 @@ class TestApp(Gtk.Application):
 #		self.menu_indicator.show_all()
 #
 #		self.indicator.set_menu(self.menu_indicator)
-
 
 
 	def create_main_window(self):

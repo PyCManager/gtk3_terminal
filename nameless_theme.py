@@ -1,4 +1,4 @@
-from gi.repository import Gtk as gtk, Gdk as gdk, Gio as gio
+from gi.repository import Gtk, Gdk, Gio
 import nameless_config as config
 import os
 
@@ -59,9 +59,9 @@ class TestTheme(object):
 				
 		if theme_name == "default":
 			print("Using default theme")
-			self.relief_button_shortcut_box = gtk.ReliefStyle.NORMAL
-			self.relief_button_tab_box = gtk.ReliefStyle.NORMAL
-			self.relief_button_main_menu = gtk.ReliefStyle.NORMAL
+			self.relief_button_shortcut_box = Gtk.ReliefStyle.NORMAL
+			self.relief_button_tab_box = Gtk.ReliefStyle.NORMAL
+			self.relief_button_main_menu = Gtk.ReliefStyle.NORMAL
 		
 		elif theme_name == "solarized_dark" or theme_name == "debug":
 			self.c_1 = c_base01
@@ -76,9 +76,9 @@ class TestTheme(object):
 			for icon_name in icon_dict:
 				icon_dict[icon_name] = path_theme + icon_name
 
-			self.relief_button_shortcut_box = gtk.ReliefStyle.NONE
-			self.relief_button_tab_box = gtk.ReliefStyle.NONE
-			self.relief_button_main_menu = gtk.ReliefStyle.NONE
+			self.relief_button_shortcut_box = Gtk.ReliefStyle.NONE
+			self.relief_button_tab_box = Gtk.ReliefStyle.NONE
+			self.relief_button_main_menu = Gtk.ReliefStyle.NONE
 			
 		elif theme_name == "solarized_light":
 			self.c_1 = c_base01
@@ -93,9 +93,9 @@ class TestTheme(object):
 			for icon_name in icon_dict:
 				icon_dict[icon_name] = path_theme + icon_name
 			
-			self.relief_button_shortcut_box = gtk.ReliefStyle.NONE
-			self.relief_button_tab_box = gtk.ReliefStyle.NONE
-			self.relief_button_main_menu = gtk.ReliefStyle.NONE
+			self.relief_button_shortcut_box = Gtk.ReliefStyle.NONE
+			self.relief_button_tab_box = Gtk.ReliefStyle.NONE
+			self.relief_button_main_menu = Gtk.ReliefStyle.NONE
 			
 
 		self.palette = [self.c_1, self.c_2, self.c_3, self.c_4, self.c_5, self.c_6, self.c_7, self.c_8, 
@@ -147,7 +147,7 @@ class TestTheme(object):
 	
 		
 	def hex_to_RGBA(self, hex_color):
-		RGBA_color = gdk.RGBA()
+		RGBA_color = Gdk.RGBA()
 		RGBA_color.parse(hex_color)
 		RGBA_color.to_string()
 		return RGBA_color
@@ -158,16 +158,12 @@ class TestTheme(object):
 #		print("IMG PATH:", image_path)
 		if os.path.isfile(image_path):
 			try:
-				image = gtk.Image.new_from_file(image_path)
+				image = Gtk.Image.new_from_file(image_path)
 			except Exception:
 				print("Exception opening file:", image_path)
 		else:
 			image_name = icon_dict[image_name]
-			icon = gio.ThemedIcon(name=image_name)
-			image = gtk.Image.new_from_gicon(icon, gtk.IconSize.BUTTON)
+			icon = Gio.ThemedIcon(name=image_name)
+			image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
 		
 		return image
-		
-		
-
-		

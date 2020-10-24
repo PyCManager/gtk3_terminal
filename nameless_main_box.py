@@ -1,14 +1,14 @@
-from gi.repository import Gtk as gtk
+from gi.repository import Gtk
 import nameless_config as config, nameless_term_box, nameless_tool_box
 import os
 
 
 
-class TestMainBox(gtk.Box):
+class TestMainBox(Gtk.Box):
 	
 	def __init__(self, parent, theme):
-		gtk.Box.__init__(self, orientation=gtk.Orientation.VERTICAL)
-		gtk.StyleContext.add_class(self.get_style_context(), "linked")
+		Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL)
+		Gtk.StyleContext.add_class(self.get_style_context(), "linked")
 		self.set_name("main_box")
 		self.parent = parent
 		
@@ -76,10 +76,10 @@ class TestMainBox(gtk.Box):
 			self.active_term.show_now()
 			
 			self.scroll_bar_term_vadj = self.active_term.get_vadjustment()
-			self.scroll_bar_term = gtk.Scrollbar(orientation=gtk.Orientation.VERTICAL, adjustment=self.scroll_bar_term_vadj)
+			self.scroll_bar_term = Gtk.Scrollbar(orientation=Gtk.Orientation.VERTICAL, adjustment=self.scroll_bar_term_vadj)
 			self.scroll_bar_term.set_name("scroll_bar_term")
 			
-			self.scroll_box_term = gtk.Box()
+			self.scroll_box_term = Gtk.Box()
 			self.scroll_box_term.add(self.scroll_bar_term)
 			self.scroll_box_term.set_name("scroll_box_term")
 			

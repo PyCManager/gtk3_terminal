@@ -1,6 +1,12 @@
-#from gi.repository import Gtk, Gdk, Keybinder, Wnck
-from gi.repository import Gtk, Gdk
 import nameless_config as config, nameless_main_box
+import platform
+
+p = platform.system()
+
+if p == "Darwin":
+	from gi.repository import Gtk, Gdk
+else:
+	from gi.repository import Gtk, Gdk, Keybinder, Wnck
 
 
 
@@ -16,10 +22,11 @@ class MainWindow(Gtk.ApplicationWindow):
 		self.connect("focus-in-event", self.on_focus_in_event)
 		self.connect("focus-out-event", self.on_focus_out_event)
 
-		#self.wnck = Wnck.Screen.get_default()
-		#self.wnck.force_update()
-		#self.active_workspace = self.wnck.get_active_workspace()
-		#self.last_active_workspace = self.wnck.get_active_workspace()
+		if p == "Linux":
+			self.wnck = Wnck.Screen.get_default()
+			self.wnck.force_update()
+			self.active_workspace = self.wnck.get_active_workspace()
+			self.last_active_workspace = self.wnck.get_active_workspace()
 
 		self.is_present = True
 		self.have_focus = True
@@ -72,15 +79,16 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
 	def hide_app(self, key_bind_hide, user_data):
-		#self.last_event_time = Keybinder.get_current_event_time()
-		#print ("Event time:", self.last_event_time)
+		if p == "Linux":
+			self.last_event_time = Keybinder.get_current_event_time()
+			print ("Event time:", self.last_event_time)
 
-		#self.wnck.force_update()
-		#self.active_workspace = self.wnck.get_active_workspace()
-#		print("Workspaces:", self.wnck.get_workspaces())
-#		print("Active workspace:", self.active_workspace)
-#		print("Last active workspace:", self.last_active_workspace)
-#
+			self.wnck.force_update()
+			self.active_workspace = self.wnck.get_active_workspace()
+			print("Workspaces:", self.wnck.get_workspaces())
+			print("Active workspace:", self.active_workspace)
+			print("Last active workspace:", self.last_active_workspace)
+
 		if self.is_present:
 			print("Hiding app")
 			if self.parent.is_drop_down:
@@ -92,13 +100,16 @@ class MainWindow(Gtk.ApplicationWindow):
 		else:
 			print("Showing app")
 			if self.parent.is_drop_down:
-				#if self.last_active_workspace != self.active_workspace:
-				#	self.last_active_workspace = self.active_workspace
-				#	self.hide()
+				if p == "Linux":
+					if self.last_active_workspace != self.active_workspace:
+						self.last_active_workspace = self.active_workspace
+						self.hide()
 
 				self.show()
-#				self.present()
-#				self.set_icon_from_file(config.file_program_icon)
+
+				if p == "Linux":
+					self.present()
+					self.set_icon_from_file(config.file_program_icon)
 
 			self.present_with_time(self.last_event_time)
 			self.main_box.active_term.grab_focus()
