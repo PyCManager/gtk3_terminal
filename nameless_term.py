@@ -1,13 +1,19 @@
 #! /usr/bin/env python3
 
-from gi.repository import Gtk, Gio, GLib
-# from gi.repository import Gtk, Gio, GLib, Notify
-#from gi.repository import AppIndicator3
 import nameless_theme, nameless_config as config, nameless_main_window
+import platform
 import logging
 import signal
 import sys
 import re
+
+p = platform.system()
+
+if p == "Darwin":
+	from gi.repository import Gtk, Gio, GLib
+else:
+	from gi.repository import Gtk, Gio, GLib, Notify
+	#from gi.repository import AppIndicator3
 
 theme = nameless_theme.TestTheme(config.default_theme)
 logging.basicConfig(stream=sys.stderr, level=config.logging_level)
@@ -17,8 +23,8 @@ class TestApp(Gtk.Application):
 
 	def __init__(self):
 		Gtk.Application.__init__(self,
-								application_id="org.keiwop.nameless_term",
-								flags=Gio.ApplicationFlags.FLAGS_NONE)
+								 application_id="org.keiwop.nameless_term",
+								 flags=Gio.ApplicationFlags.FLAGS_NONE)
 
 
 	def do_startup(self):
@@ -424,18 +430,17 @@ class TestApp(Gtk.Application):
 			self.header_bar.show()
 			self.main_window.active_term.grab_focus()
 		else:
-			"""
-			Notify.init(config.title_application)
-			notification_fullscreen = Notify.Notification.new(config.title_application, 
-											"App is in fullscreen, press F11 to quit", 
-											"view-fullscreen-symbolic")
-			notification_fullscreen.add_action("app.toggle_fullscreen",
-												"toggle_fullscreen",
-												app.toggle_fullscreen,
-												None,
-												None)
-			notification_fullscreen.show()
-			"""
+			if p == "Linux":
+				Notify.init(config.title_application)
+				notification_fullscreen = Notify.Notification.new(config.title_application,
+												"App is in fullscreen, press F11 to quit",
+												"view-fullscreen-symbolic")
+				notification_fullscreen.add_action("app.toggle_fullscreen",
+													"toggle_fullscreen",
+													app.toggle_fullscreen,
+													None,
+													None)
+				notification_fullscreen.show()
 
 			self.main_window.fullscreen()
 			self.header_bar.hide()
